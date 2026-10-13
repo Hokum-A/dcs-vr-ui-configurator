@@ -1,8 +1,7 @@
 # DCS World VR UI Configurator
 
-**Language / Язык:** [🇬🇧 English](#english) · [🇷🇺 Русский](#русский)
-
-## 🇬🇧 English
+<a id="english"></a>
+## English
 
 A Windows application for customizing selected parts of the DCS World interface, with a focus on VR. Adjust message and radio menu sizing, choose the VR background scene used by the main menu and F-10 map, and manage supported `autoexec.cfg` tweaks.
 
@@ -74,7 +73,10 @@ This project is licensed under the [MIT License](LICENSE).
 
 ---
 
-## 🇷🇺 Русский
+[Русский — перейти к русской версии ↓](#russian)
+
+<a id="russian"></a>
+## Русский
 
 Программа для Windows, предназначенная для настройки отдельных элементов интерфейса DCS World, в первую очередь в VR. Позволяет менять размеры сообщений и радиоменю, выбирать фоновую VR-сцену главного меню и карты F-10, а также управлять поддерживаемыми параметрами `autoexec.cfg`.
 
@@ -143,3 +145,5 @@ py -3.12 -m PyInstaller --clean --noconfirm dcs_vr_ui_configurator.spec
 ## Лицензия
 
 Проект распространяется по лицензии [MIT](LICENSE).
+
+[English — back to the English version ↑](#english)
