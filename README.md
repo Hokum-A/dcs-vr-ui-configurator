@@ -1,20 +1,108 @@
 # DCS World VR UI Configurator
 
-Программа для настройки отдельных элементов интерфейса DCS World, в первую очередь для использования в VR. Позволяет менять оформление сообщений и радиоменю, выбирать VR-сцену главного меню и карты F-10, а также управлять поддерживаемыми параметрами `autoexec.cfg`.
+A Windows application for customizing selected parts of the DCS World interface, with a focus on VR. Adjust message and radio menu sizing, choose the VR background scene used by the main menu and F-10 map, and manage supported `autoexec.cfg` tweaks.
+
+## Features
+
+- Presets for message and radio menu settings, plus a custom profile.
+- Adjust message width and font size, and radio menu scale and dimensions.
+- Choose the VR background scene: DCS original, procedural sky, or a minimal black scene.
+- Manage supported `autoexec.cfg` settings: `DLSS_Preset`, `HUD_MFD_after_DLSS`, `disable_write_track`, `no_device_hotplug`, and `options.graphics.stereo_mode_use_shared_parser`.
+- Automatically detect DCS World and Saved Games paths, with an option to change them in the app.
+
+The custom profile stores settings from the **Messages & Chat** and **Radio Menu** tabs. **Optimization & Tweaks** settings are applied separately and are not part of the profile.
+
+The app does not modify `messagesFontScale` in `options.lua`; that setting remains under the control of the DCS launcher.
+
+## Screenshot
+
+*Screenshot coming soon.*
+
+<!-- Save the English screenshot as docs/images/screenshot-en.png, then replace this note with:
+![DCS VR UI Configurator screenshot](docs/images/screenshot-en.png)
+-->
+
+## Download
+
+The Windows x64 executable will be published on the [GitHub Releases](https://github.com/Hokum-A/dcs-vr-ui-configurator/releases) page.
+
+## Run from source (Windows)
+
+Python 3.12 is tested with this project.
+
+1. Open PowerShell in the project folder.
+2. Install dependencies:
+
+   ```powershell
+   py -3.12 -m pip install -r requirements.txt
+   ```
+
+3. Run the application:
+
+   ```powershell
+   py -3.12 app.py
+   ```
+
+## Build the executable
+
+Install the application dependencies and PyInstaller:
+
+```powershell
+py -3.12 -m pip install -r requirements.txt pyinstaller
+```
+
+Then build from the project folder:
+
+```powershell
+py -3.12 -m PyInstaller --clean --noconfirm dcs_vr_ui_configurator.spec
+```
+
+The executable will be created in `dist/`.
+
+## Backups and restoration
+
+- On first launch, the app saves available original DCS files in `backups/original/`. The original `SceneVR.lua` is backed up before the first VR scene change.
+- The restore button restores saved originals for supported DCS files. `autoexec.cfg` is not included in this restoration.
+- Keep `backups/original/` if you want to use the restore feature. Do not publish the `backups/` folder; it may contain files from your DCS installation.
+- App settings and local paths are stored in `settings.json`, which is created automatically and should not be committed.
+
+## License
+
+This project is licensed under the [MIT License](LICENSE).
+
+---
+
+# DCS World VR UI Configurator
+
+Программа для Windows, предназначенная для настройки отдельных элементов интерфейса DCS World, в первую очередь в VR. Позволяет менять размеры сообщений и радиоменю, выбирать фоновую VR-сцену главного меню и карты F-10, а также управлять поддерживаемыми параметрами `autoexec.cfg`.
 
 ## Возможности
 
 - Пресеты для сообщений и радиоменю, а также сохранение пользовательского профиля.
-- Настройка ширины и размера шрифта сообщений и параметров радиоменю.
-- Выбор фоновой сцены VR: оригинальная сцена DCS, процедурное небо или минималистичная чёрная сцена.
-- Переключение поддерживаемых параметров `autoexec.cfg`: `DLSS_Preset`, `HUD_MFD_after_DLSS`, `disable_write_track`, `no_device_hotplug` и `options.graphics.stereo_mode_use_shared_parser`.
+- Настройка ширины и размера шрифта сообщений, масштаба и размеров радиоменю.
+- Выбор фоновой VR-сцены: оригинальная сцена DCS, процедурное небо или минималистичная чёрная сцена.
+- Управление поддерживаемыми параметрами `autoexec.cfg`: `DLSS_Preset`, `HUD_MFD_after_DLSS`, `disable_write_track`, `no_device_hotplug` и `options.graphics.stereo_mode_use_shared_parser`.
 - Автоматическое определение путей к DCS World и папке Saved Games с возможностью изменить их в программе.
 
-Пользовательский профиль содержит параметры вкладок «Сообщения и Чат» и «Радиоменю». Настройки вкладки «Оптимизация и твики» применяются отдельно и в пользовательский профиль не входят.
+Пользовательский профиль содержит настройки вкладок **«Сообщения и Чат»** и **«Радиоменю»**. Параметры вкладки **«Оптимизация и твики»** применяются отдельно и в профиль не входят.
 
-## Запуск из исходников в Windows
+Программа не изменяет `messagesFontScale` в `options.lua`; это значение остаётся под управлением лаунчера DCS.
 
-Требуется установленный Python. Python 3.12 проверен для запуска этой программы.
+## Скриншот
+
+*Скриншот будет добавлен.*
+
+<!-- Сохраните русский скриншот как docs/images/screenshot-ru.png, затем замените эту заметку строкой:
+![Скриншот DCS VR UI Configurator](docs/images/screenshot-ru.png)
+-->
+
+## Скачать
+
+Сборка для Windows x64 будет опубликована на странице [GitHub Releases](https://github.com/Hokum-A/dcs-vr-ui-configurator/releases).
+
+## Запуск из исходников (Windows)
+
+Для проекта проверен Python 3.12.
 
 1. Откройте PowerShell в папке проекта.
 2. Установите зависимости:
@@ -29,28 +117,29 @@
    py -3.12 app.py
    ```
 
-Чтобы запускать `app.py` двойным щелчком без окна консоли, назначьте для файлов `.py` приложение `pythonw.exe` того же Python, в который установлены зависимости. Например, для Python 3.12 это `Python312\pythonw.exe`.
-
-## Резервные копии и восстановление
-
-- При первом запуске программа сохраняет доступные оригинальные файлы DCS в `backups/original/`. Оригинал `SceneVR.lua` также сохраняется перед первым переключением VR-сцены.
-- Кнопка восстановления возвращает сохранённые оригиналы поддерживаемых файлов DCS. Файл `autoexec.cfg` в эту функцию восстановления не входит.
-- Не удаляйте `backups/original/`, если хотите пользоваться восстановлением оригиналов.
-
-Настройки путей и программы хранятся локально в `settings.json`; этот файл создаётся автоматически и не нужен для публикации исходников.
-
 ## Сборка EXE
 
-Установите зависимости приложения и PyInstaller:
+Установите зависимости программы и PyInstaller:
 
 ```powershell
 py -3.12 -m pip install -r requirements.txt pyinstaller
 ```
 
-Затем из папки проекта выполните:
+Затем выполните команду из папки проекта:
 
 ```powershell
 py -3.12 -m PyInstaller --clean --noconfirm dcs_vr_ui_configurator.spec
 ```
 
-Готовая сборка появится в папке `dist/`
+Готовый EXE появится в папке `dist/`.
+
+## Резервные копии и восстановление
+
+- При первом запуске программа сохраняет доступные оригинальные файлы DCS в `backups/original/`. Оригинал `SceneVR.lua` сохраняется перед первым переключением VR-сцены.
+- Кнопка восстановления возвращает сохранённые оригиналы поддерживаемых файлов DCS. `autoexec.cfg` в это восстановление не входит.
+- Не удаляйте `backups/original/`, если хотите пользоваться восстановлением. Не публикуйте папку `backups/`: в ней могут находиться файлы из вашей установки DCS.
+- Настройки программы и локальные пути хранятся в `settings.json`. Он создаётся автоматически и не должен попадать в репозиторий.
+
+## Лицензия
+
+Проект распространяется по лицензии [MIT](LICENSE).
