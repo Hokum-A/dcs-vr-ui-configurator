@@ -1,5 +1,9 @@
 # DCS World VR UI Configurator
 
+**Language / Язык:** [🇬🇧 English](#english) · [🇷🇺 Русский](#русский)
+
+## 🇬🇧 English
+
 A Windows application for customizing selected parts of the DCS World interface, with a focus on VR. Adjust message and radio menu sizing, choose the VR background scene used by the main menu and F-10 map, and manage supported `autoexec.cfg` tweaks.
 
 ## Features
@@ -11,8 +15,6 @@ A Windows application for customizing selected parts of the DCS World interface,
 - Automatically detect DCS World and Saved Games paths, with an option to change them in the app.
 
 The custom profile stores settings from the **Messages & Chat** and **Radio Menu** tabs. **Optimization & Tweaks** settings are applied separately and are not part of the profile.
-
-The app does not modify `messagesFontScale` in `options.lua`; that setting remains under the control of the DCS launcher.
 
 ## Screenshot
 
@@ -72,7 +74,7 @@ This project is licensed under the [MIT License](LICENSE).
 
 ---
 
-# DCS World VR UI Configurator
+## 🇷🇺 Русский
 
 Программа для Windows, предназначенная для настройки отдельных элементов интерфейса DCS World, в первую очередь в VR. Позволяет менять размеры сообщений и радиоменю, выбирать фоновую VR-сцену главного меню и карты F-10, а также управлять поддерживаемыми параметрами `autoexec.cfg`.
 
@@ -85,8 +87,6 @@ This project is licensed under the [MIT License](LICENSE).
 - Автоматическое определение путей к DCS World и папке Saved Games с возможностью изменить их в программе.
 
 Пользовательский профиль содержит настройки вкладок **«Сообщения и Чат»** и **«Радиоменю»**. Параметры вкладки **«Оптимизация и твики»** применяются отдельно и в профиль не входят.
-
-Программа не изменяет `messagesFontScale` в `options.lua`; это значение остаётся под управлением лаунчера DCS.
 
 ## Скриншот
 
