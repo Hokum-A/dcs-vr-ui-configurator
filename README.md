@@ -27,7 +27,7 @@ The custom profile stores settings from the **Messages & Chat** and **Radio Menu
 
 ## Download
 
-The Windows x64 executable will be published on the [GitHub Releases](https://github.com/Hokum-A/dcs-vr-ui-configurator/releases) page.
+Download the [latest Windows x64 release](https://github.com/Hokum-A/dcs-vr-ui-configurator/releases/latest). You can also [browse all releases](https://github.com/Hokum-A/dcs-vr-ui-configurator/releases).
 
 ## Run from source (Windows)
 
@@ -101,7 +101,7 @@ This project is licensed under the [MIT License](LICENSE).
 
 ## Скачать
 
-Сборка для Windows x64 будет опубликована на странице [GitHub Releases](https://github.com/Hokum-A/dcs-vr-ui-configurator/releases).
+Скачайте [последнюю версию для Windows x64](https://github.com/Hokum-A/dcs-vr-ui-configurator/releases/latest). Также доступны [все релизы проекта](https://github.com/Hokum-A/dcs-vr-ui-configurator/releases).
 
 ## Запуск из исходников (Windows)
 
