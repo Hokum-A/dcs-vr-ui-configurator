@@ -21,6 +21,10 @@ The custom profile stores settings from the **Messages & Chat** and **Radio Menu
 
 ![DCS VR UI Configurator — English interface](docs/images/screenshot-en.png)
 
+### In-game comparison
+
+![In-game VR scene comparison before and after applying the change](<docs/images/VRframe comparison.gif>)
+
 ## Download
 
 The Windows x64 executable will be published on the [GitHub Releases](https://github.com/Hokum-A/dcs-vr-ui-configurator/releases) page.
@@ -90,6 +94,10 @@ This project is licensed under the [MIT License](LICENSE).
 ## Скриншот
 
 ![DCS VR UI Configurator — интерфейс на русском языке](docs/images/screenshot-ru.png)
+
+### Сравнение в игре
+
+![Сравнение VR-сцены в игре до и после изменения](<docs/images/VRframe comparison.gif>)
 
 ## Скачать
 
