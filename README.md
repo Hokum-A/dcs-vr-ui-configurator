@@ -1,6 +1,6 @@
 # DCS World VR UI Configurator
 
-[Русский — перейти к русской версии ↓](https://github.com/Hokum-A/dcs-vr-ui-configurator?tab=readme-ov-file#russian)
+<a href="https://github.com/Hokum-A/dcs-vr-ui-configurator?tab=readme-ov-file#russian"><img src="docs/images/flag-ru.svg" alt="Русский" width="28"></a> [Русский — перейти к русской версии ↓](https://github.com/Hokum-A/dcs-vr-ui-configurator?tab=readme-ov-file#russian)
 
 <a id="english"></a>
 ## English
@@ -19,11 +19,7 @@ The custom profile stores settings from the **Messages & Chat** and **Radio Menu
 
 ## Screenshot
 
-*Screenshot coming soon.*
-
-<!-- Save the English screenshot as docs/images/screenshot-en.png, then replace this note with:
-![DCS VR UI Configurator screenshot](docs/images/screenshot-en.png)
--->
+![DCS VR UI Configurator — English interface](docs/images/screenshot-en.png)
 
 ## Download
 
@@ -78,7 +74,7 @@ This project is licensed under the [MIT License](LICENSE).
 <a id="russian"></a>
 ## Русский
 
-[English — перейти к английской версии ↑](https://github.com/Hokum-A/dcs-vr-ui-configurator?tab=readme-ov-file#english)
+<a href="https://github.com/Hokum-A/dcs-vr-ui-configurator?tab=readme-ov-file#english"><img src="docs/images/flag-uk.svg" alt="English" width="28"></a> [English — перейти к английской версии ↑](https://github.com/Hokum-A/dcs-vr-ui-configurator?tab=readme-ov-file#english)
 
 Программа для Windows, предназначенная для настройки отдельных элементов интерфейса DCS World, в первую очередь в VR. Позволяет менять размеры сообщений и радиоменю, выбирать фоновую VR-сцену главного меню и карты F-10, а также управлять поддерживаемыми параметрами `autoexec.cfg`.
 
@@ -94,11 +90,7 @@ This project is licensed under the [MIT License](LICENSE).
 
 ## Скриншот
 
-*Скриншот будет добавлен.*
-
-<!-- Сохраните русский скриншот как docs/images/screenshot-ru.png, затем замените эту заметку строкой:
-![Скриншот DCS VR UI Configurator](docs/images/screenshot-ru.png)
--->
+![DCS VR UI Configurator — интерфейс на русском языке](docs/images/screenshot-ru.png)
 
 ## Скачать
 
