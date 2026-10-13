@@ -1,0 +1,398 @@
+# Translations dictionary for DCS VR UI Configurator (RU & EN)
+
+STRINGS = {
+    "ru": {
+        "app_title": "DCS VR UI Configurator",
+        "app_subtitle": "Тонкая настройка размера шрифтов, радиоменю и зоны сообщений в шлеме VR",
+        "status_dcs_found": "● DCS обнаружен",
+        "status_dcs_missing": "● DCS не найден",
+        "status_backup_safe": "● Оригиналы защищены",
+        "status_backup_missing": "● Бэкап не найден",
+        "quick_actions": "Быстрые действия:",
+        "btn_reapply": "⚡ Применить профиль (в 1 клик после обновления DCS)",
+        "btn_reload_files": "🔄 Перечитать файлы",
+        
+        # Tabs
+        "tab_presets": "🌟 Пресеты и Быстрый старт",
+        "tab_messages": "💬 Сообщения и Чат (gameMessages.lua)",
+        "tab_radio": "📻 Радиоменю (CommandMenu.lua)",
+        "tab_options": "🥽 Опции DCS (options.lua)",
+        "tab_tweaks": "⚡ Оптимизация и твики",
+        "tab_backups": "📁 Пути и Резервные копии",
+
+        # Presets Tab
+        "presets_info": "💡 Пресеты применяются сразу при нажатии — настройки мгновенно записываются в файлы DCS.\nПосле выбора пресета вы можете подстроить ползунки и сохранить результат как свой профиль.",
+        "btn_select_preset": "Выбрать пресет",
+        "preset_applied_status": "Пресет «{title}» успешно применён к файлам DCS.",
+        "preset_applied_no_changes": "Пресет «{title}» уже активен, изменений не потребовалось.",
+
+        # Presets definitions
+        "preset_rec_title": "Рекомендуемый (Quest 3 / Оптимальный)",
+        "preset_rec_desc": "Сбалансированные размеры для VR. Текст сообщений занимает 1/4 экрана, четкий аккуратный шрифт 13pt (вместо огромного 20pt), радиоменю 1.40x.",
+        
+        "preset_fixed_title": "Фиксированная ширина (650 px)",
+        "preset_fixed_desc": "Ширина окна сообщений жестко зафиксирована на 650px (как в обычном режиме монитора), радиоменю 1.30x.",
+        
+        "preset_compact_title": "Компактный (Минимум оверлеев)",
+        "preset_compact_desc": "Максимальный обзор вперед. Сообщения занимают лишь 1/5 экрана справа, шрифт 12pt, радиоменю 1.20x.",
+        
+        "preset_default_title": "Настройки DCS World по умолчанию",
+        "preset_default_desc": "Оригинальные заводские параметры разработчиков DCS: гигантский шрифт 20pt, растягивание на полкабины (1/2 экрана), радиоменю 1.75x.",
+        
+        "preset_custom_title": "Пользовательский профиль (Мои настройки)",
+        "preset_custom_desc_empty": "Вы ещё не сохраняли собственные настройки.\nНастройте параметры на соседних вкладках и нажмите «Сохранить свой профиль».",
+        "preset_custom_desc_active_unsaved": "В файлах DCS активны ваши настройки (показаны выше), но профиль ещё не сохранён в программе.\nНажмите «Сохранить свой профиль» внизу, чтобы зафиксировать их как свой пресет.",
+        "btn_load_custom": "Выбрать свой профиль",
+        "btn_save_custom": "Сохранить свой профиль",
+        "btn_save_custom_tooltip": "Сохраняет настройки с вкладок «Сообщения» и «Радиоменю» в пользовательский профиль. Твики на вкладке «Оптимизация и твики» применяются отдельно и в профиль не входят.",
+        "custom_matches_preset": "(Соответствует пресету «{name}»)",
+        "badge_active_dcs": "✔  Активен в DCS",
+        "badge_active_dcs_unsaved": "✔  В DCS активны ваши настройки",
+        "badge_ready_1click": "⚡  Готов к применению в 1 клик",
+        "preset_loaded_custom_status": "Ваш сохраненный профиль успешно применён к файлам DCS.",
+        "preset_loaded_custom_no_changes": "Ваш профиль уже активен, изменений не потребовалось.",
+        "btn_reapply_profile": "⚡ Применить «{name}» (в 1 клик)",
+
+        # Custom profile save
+        "custom_saved_status": "Текущие настройки сохранены в ваш профиль.",
+        "custom_saved_no_changes": "Профиль сохранён. Файлы DCS уже содержат эти значения.",
+
+        # Detailed custom profile labels
+        "custom_detail_width_mode": "Режим ширины:",
+        "custom_detail_width_mode_fraction": "Доля экрана",
+        "custom_detail_width_mode_fixed": "Фиксированные px",
+        "custom_detail_fraction": "Доля экрана:",
+        "custom_detail_fixed_width": "Ширина (px):",
+        "custom_detail_font_size": "Размер шрифта:",
+        "custom_detail_radio_scale": "VR масштаб радиоменю:",
+        "custom_detail_radio_size": "Размер радиоменю:",
+        # Messages Tab
+        "msg_card1_title": "1. Ширина зоны сообщений на экране в VR",
+        "msg_card1_desc": "В оригинале DCS окно растягивается на половину экрана (1/2), закрывая прицел. Выберите долю экрана или точную ширину.",
+        "mode_fraction": "Доля экрана (динамическая)",
+        "mode_fixed": "Фиксированные пиксели (как на мониторе)",
+        "fraction_label": "Выберите долю ширины экрана:",
+        "frac_1_2": "1/2 (Дефолт 50%)",
+        "frac_1_3": "1/3 (Широко 33%)",
+        "frac_1_4": "1/4 (Рекомендуем 25%)",
+        "frac_1_5": "1/5 (Минимум 20%)",
+        "fixed_label": "Ширина в пикселях:",
+        "msg_card2_title": "2. Размер шрифта сообщений и радиообмена",
+        "msg_font_size_label": "Размер шрифта радиообмена и сообщений (в игре по умолчанию 20 pt, рекомендуем 13 pt):",
+
+        # Radio Tab
+        "radio_card_title": "Настройки меню радиокоманд (F1–F12) в VR",
+        "radio_card_desc": "DCS принудительно увеличивает радиоменю на множитель 1.75x в VR, из-за чего оно часто перекрывает важные приборы кабины справа.",
+        "radio_scale_label": "Множитель масштаба радиоменю в VR (Дефолт 1.75x, Рекомендуем 1.40x):",
+        "radio_width_label": "Базовая ширина меню (Дефолт 280):",
+        "radio_height_label": "Базовая высота меню (Дефолт 400):",
+
+        # Options Tab
+        "opt_card_title": "Параметры графики и VR из options.lua (Saved Games)",
+        "opt_card_desc": "Эти настройки хранятся в папке пользователя и не затираются при обновлении DCS, но непосредственно влияют на VR.",
+        "opt_scale_label": "Глобальный messagesFontScale (Дефолт 1.0):",
+        "opt_ipd_label": "Пользовательский IPD в игре (мм, дефолт 63):",
+        "opt_box_cursor": "Ограничивать курсор мыши окном игры в VR (box_mouse_cursor)",
+
+        # Tweaks Tab
+        "scene_card_title": "Фоновая 3D-сцена в VR (SceneVR.lua) • Меню и карта F-10",
+        "scene_card_desc": "Определяет 3D-окружение позади главного меню и карты F-10 в VR-шлеме.\nВ оригинале DCS загружает тяжелый ангар с Су-27, расходуя до 1 ГБ видеопамяти и вызывая фризы при открытии карты F-10.\nВыбор облегченного режима устраняет задержки и экономит видеопамять.",
+        "scene_opt_original": "Оригинал DCS (тяжелый ангар с Су-27, по умолчанию)",
+        "scene_opt_original_sub": "Заводская сцена: 3D-модели укрытия и самолета, текстуры и свет (расходует VRAM)",
+        "scene_opt_sky": "Чистое небо (Рекомендуется)",
+        "scene_opt_sky_sub": "Легкий процедурный купол неба: экономит до 1 ГБ VRAM, устраняет фризы при открытии карты F-10",
+        "scene_opt_black": "Черный минимализм",
+        "scene_opt_black_sub": "Пустая сцена с черным фоном: без графики окружения, максимальная экономия ресурсов",
+        "scene_status_label": "Активно в DCS:",
+        "scene_status_original": "Оригинал (Ангар с Су-27)",
+        "scene_status_sky": "Чистое небо (Оптимально)",
+        "scene_status_black": "Черный минимализм",
+        "scene_status_unknown": "Неизвестная модификация",
+        "scene_applied_status": "Сцена VR переключена на «{mode}». Оригинал сохранён в бэкапе.",
+
+        # autoexec.cfg Card
+        "cfg_card_title": "Твики движка и графики (autoexec.cfg)",
+        "cfg_card_desc": "Параметры записываются в Config\\autoexec.cfg сразу после изменения. Остальные строки файла сохраняются.",
+        "cfg_badge_found": "Файл найден",
+        "cfg_badge_missing": "Файл не найден",
+        "cfg_badge_error": "Ошибка чтения",
+        "cfg_dlss_name": "DLSS_Preset",
+        "cfg_dlss_desc": "Пресет DLSS. Можно выбрать J, K, L или M либо ввести одну латинскую букву вручную. По умолчанию при включении используется K.",
+        "cfg_hud_name": "HUD_MFD_after_DLSS",
+        "cfg_hud_desc": "Не применяет DLSS к элементам HUD и МФД, помогая сохранить их чёткость.",
+        "cfg_track_name": "disable_write_track",
+        "cfg_track_desc": "Отключает запись файлов треков миссии.",
+        "cfg_hotplug_name": "no_device_hotplug",
+        "cfg_hotplug_desc": "Отключает периодический опрос подключенных устройств, который может вызывать подтормаживания.",
+        "cfg_shared_parser_name": "options.graphics.stereo_mode_use_shared_parser",
+        "cfg_shared_parser_desc": "Включает оптимизацию VR, которая может отключать рендеринг невидимых частей сцены и немного повысить производительность.",
+        "cfg_error_duplicate": "Параметр указан в файле несколько раз. Изменение заблокировано, чтобы не перезаписать неоднозначное значение.",
+        "cfg_error_invalid": "Значение параметра записано в неподдерживаемом формате. Изменение заблокировано.",
+        "cfg_invalid_preset_input": "Введите одну латинскую букву для пресета DLSS.",
+        "cfg_path_unavailable": "Не удалось определить путь к autoexec.cfg.",
+        "cfg_read_error": "Не удалось прочитать autoexec.cfg: {error}",
+        "cfg_apply_error": "Не удалось применить параметр «{option}»:\n{error}",
+        "cfg_option_applied": "Параметр «{option}» применён.",
+        "cfg_option_unchanged": "Параметр «{option}» уже имеет выбранное значение.",
+
+        # Backups Tab
+        "paths_title": "Каталоги игры и профиля",
+        "dcs_path_label": "Папка DCS World:",
+        "sg_path_label": "Папка Saved Games DCS:",
+        "btn_browse": "Обзор...",
+        "btn_autodetect": "🔍 Автопоиск",
+        "dcs_path_hint": "💡 Корневая папка игры (где находятся папки bin и Scripts)",
+        "sg_path_hint": "💡 Папка настроек профиля (где лежит Config\\options.lua)",
+        "path_valid_dcs": "✔ Файлы DCS World обнаружены",
+        "path_invalid_dcs": "✖ gameMessages.lua не найден в этой папке",
+        "path_valid_sg": "✔ options.lua обнаружен",
+        "path_invalid_sg": "✖ options.lua не найден в этой папке",
+        "autodetect_found_msg": "Пути к DCS World успешно найдены автоматически!",
+        "autodetect_not_found_msg": "Не удалось автоматически найти папку DCS. Пожалуйста, укажите папку через «Обзор».",
+        "clean_backup_title": "Заводские оригиналы DCS",
+        "clean_backup_desc": "Оригинальные немодифицированные файлы DCS защищены в резервной копии при первом запуске.\nВ любой момент вы можете вернуть игру в исходное заводское состояние в один клик.",
+        "clean_backup_status": "✔  Заводские файлы защищены и готовы к восстановлению",
+        "btn_restore_clean": "↺  Восстановить чистые файлы DCS",
+
+        # Footer
+        "status_ready": "Готово. Текущие параметры DCS загружены.",
+        "status_reloaded": "Файлы DCS успешно перечитаны с диска.",
+        "status_snapshot_created": "Создан снимок бэкапа: {name}",
+
+        # Dialogs
+        "dialog_confirm_title": "Подтверждение",
+        "dialog_restore_confirm": "Вы действительно хотите вернуть чистые заводские файлы DCS?\nВсе модификации VR интерфейса будут отменены.",
+        "dialog_snapshot_confirm": "Восстановить файлы из снимка {folder}?",
+        "dialog_success_title": "Успешно",
+        "dialog_error_title": "Ошибка",
+        "dialog_no_custom_title": "Профиль не сохранён",
+        "dialog_no_custom_msg": "Вы ещё не сохранили собственный профиль.\n\nНастройте желаемые параметры на вкладках «Сообщения» и «Радио», затем нажмите кнопку «Сохранить свой профиль» внизу окна.",
+        "dialog_custom_saved_only": "Текущие настройки успешно сохранены в ваш профиль!\n\nЧтобы применить их к файлам DCS World, нажмите кнопку «Выбрать свой профиль» на вкладке пресетов.",
+        "dialog_saved_msg": "Настройки успешно сохранены в DCS World!\n\nОбновлено файлов ({count}):\n{files}",
+        "dialog_saved_unchanged": "Параметры сохранены. Файлы DCS уже содержат эти значения, изменений не потребовалось.",
+        "dialog_reapply_msg": "Профиль настроек успешно применен в 1 клик поверх обновленной DCS!\n\nОбновлено файлов ({count}):\n{files}",
+        "dialog_reapply_unchanged": "Профиль загружен. Файлы DCS уже содержат эти значения, изменений не потребовалось.",
+        "dialog_restore_success": "Заводские файлы DCS успешно восстановлены ({count} файлов)!",
+        "dialog_backup_success": "Бэкап успешно восстановлен ({count} файлов):\n{files}",
+        "dialog_error_apply": "Ошибки при сохранении файлов:\n{errors}",
+        "dialog_btn_ok": "OK",
+        "dialog_btn_yes": "Да",
+        "dialog_btn_cancel": "Отмена",
+
+        # About Dialog
+        "about_title": "О программе",
+        "btn_about": "ℹ О программе",
+        "btn_back": "Назад",
+        "about_desc_1": "Инструмент для тонкой настройки интерфейса, радиоменю и субтитров в VR для DCS World.",
+        "about_desc_2": "Бесплатен и будет оставаться таким.",
+        "about_desc_3": "Если хотите поддержать проект или просто выразить благодарность, воспользуйтесь ссылками ниже. Это необязательно, но очень приятно.",
+        "about_source_feedback": "Исходный код и обратная связь:",
+        "about_support_proj": "Поддержать проект:",
+        "about_dev": "Разработчик: Hokum (Андрей Варламов)",
+        "about_license": "Лицензия: MIT License",
+        "about_thanks": "Спасибо, что используете этот инструмент.",
+        "about_copied": "Скопировано!"
+    },
+    "en": {
+        "app_title": "DCS VR UI Configurator",
+        "app_subtitle": "Fine-tuning VR fonts, radio menu and message overlay for DCS World",
+        "status_dcs_found": "● DCS Detected",
+        "status_dcs_missing": "● DCS Not Found",
+        "status_backup_safe": "● Originals Protected",
+        "status_backup_missing": "● Backup Missing",
+        "quick_actions": "Quick Actions:",
+        "btn_reapply": "⚡ Apply Profile (1-Click After DCS Update)",
+        "btn_reload_files": "🔄 Reload Files",
+        
+        # Tabs
+        "tab_presets": "🌟 Presets & Quick Start",
+        "tab_messages": "💬 Messages & Chat (gameMessages.lua)",
+        "tab_radio": "📻 Radio Menu (CommandMenu.lua)",
+        "tab_options": "🥽 DCS Options (options.lua)",
+        "tab_tweaks": "⚡ Optimization & Tweaks",
+        "tab_backups": "📁 Paths & Backups",
+
+        # Presets Tab
+        "presets_info": "💡 Presets are applied instantly — settings are written to DCS files immediately.\nAfter selecting a preset, you can fine-tune sliders and save the result as your custom profile.",
+        "btn_select_preset": "Select Preset",
+        "preset_applied_status": "Preset \"{title}\" successfully applied to DCS files.",
+        "preset_applied_no_changes": "Preset \"{title}\" is already active, no changes needed.",
+
+        # Presets definitions
+        "preset_rec_title": "Recommended (Quest 3 / Optimal)",
+        "preset_rec_desc": "Balanced VR dimensions. Messages take 1/4 of the screen width, crisp 13pt font (instead of huge 20pt), compact 1.40x radio menu.",
+        
+        "preset_fixed_title": "Fixed Width (650 px)",
+        "preset_fixed_desc": "Message box width is fixed at 650px (identical to 2D desktop mode), radio menu 1.30x.",
+        
+        "preset_compact_title": "Compact (Minimal Overlays)",
+        "preset_compact_desc": "Maximum forward visibility. Messages occupy only 1/5 of the screen width on the right, 12pt font, ultra-compact 1.20x radio menu.",
+        
+        "preset_default_title": "DCS World Default Settings",
+        "preset_default_desc": "Original DCS settings: gigantic 20pt font, messages spanning half the cockpit (1/2 screen), 1.75x oversized radio menu.",
+        
+        "preset_custom_title": "Custom Profile (My Settings)",
+        "preset_custom_desc_empty": "You have not saved custom settings yet.\nAdjust sliders on the other tabs and click \"Save My Profile\".",
+        "preset_custom_desc_active_unsaved": "Your custom settings are active in DCS files (shown above), but not yet saved in the app.\nClick \"Save My Profile\" below to fix them as your preset.",
+        "btn_load_custom": "Select My Profile",
+        "btn_save_custom": "Save My Profile",
+        "btn_save_custom_tooltip": "Saves settings from the Messages and Radio Menu tabs to your custom profile. Tweaks on the Optimization & Tweaks tab are applied separately and are not included in the profile.",
+        "custom_matches_preset": "(Matches preset \"{name}\")",
+        "badge_active_dcs": "✔  Active in DCS",
+        "badge_active_dcs_unsaved": "✔  Custom settings active in DCS",
+        "badge_ready_1click": "⚡  Ready for 1-Click Apply",
+        "preset_loaded_custom_status": "Your saved profile successfully applied to DCS files.",
+        "preset_loaded_custom_no_changes": "Your profile is already active, no changes needed.",
+        "btn_reapply_profile": "⚡ Apply \"{name}\" (1-Click)",
+
+        # Custom profile save
+        "custom_saved_status": "Current settings have been saved to your profile.",
+        "custom_saved_no_changes": "Profile saved. DCS files already match these values.",
+
+        # Detailed custom profile labels
+        "custom_detail_width_mode": "Width mode:",
+        "custom_detail_width_mode_fraction": "Screen fraction",
+        "custom_detail_width_mode_fixed": "Fixed px",
+        "custom_detail_fraction": "Screen fraction:",
+        "custom_detail_fixed_width": "Width (px):",
+        "custom_detail_font_size": "Font size:",
+        "custom_detail_radio_scale": "VR radio scale:",
+        "custom_detail_radio_size": "Radio menu size:",
+        # Messages Tab
+        "msg_card1_title": "1. Message Area Width in VR",
+        "msg_card1_desc": "In vanilla DCS, the message box spans half the screen (1/2), obstructing the HUD/gunsight. Choose a screen ratio or fixed width.",
+        "mode_fraction": "Screen Fraction (Dynamic)",
+        "mode_fixed": "Fixed Pixels (Like Desktop)",
+        "fraction_label": "Select screen width fraction:",
+        "frac_1_2": "1/2 (Default 50%)",
+        "frac_1_3": "1/3 (Wide 33%)",
+        "frac_1_4": "1/4 (Recommended 25%)",
+        "frac_1_5": "1/5 (Minimum 20%)",
+        "fixed_label": "Width in pixels:",
+        "msg_card2_title": "2. Message and Radio Text Font Size",
+        "msg_font_size_label": "Radio and message font size (DCS default is 20 pt; 13 pt recommended):",
+
+        # Radio Tab
+        "radio_card_title": "Radio Command Menu (F1–F12) Settings in VR",
+        "radio_card_desc": "DCS forces a 1.75x multiplier on the radio menu in VR, often covering critical cockpit instruments on the right.",
+        "radio_scale_label": "Radio Menu Scale Multiplier in VR (Default 1.75x, Recommended 1.40x):",
+        "radio_width_label": "Base Menu Width (Default 280):",
+        "radio_height_label": "Base Menu Height (Default 400):",
+
+        # Options Tab
+        "opt_card_title": "Graphics & VR Options from options.lua (Saved Games)",
+        "opt_card_desc": "These settings are stored in your user profile and survive DCS updates, directly affecting VR.",
+        "opt_scale_label": "Global messagesFontScale (Default 1.0):",
+        "opt_ipd_label": "Custom in-game IPD (mm, default 63):",
+        "opt_box_cursor": "Confine VR mouse cursor to game window (box_mouse_cursor)",
+
+        # Tweaks Tab
+        "scene_card_title": "VR Background Scene (SceneVR.lua) • Menu & F-10 Map",
+        "scene_card_desc": "Controls the 3D environment behind the main menu and F-10 map in VR.\nBy default, DCS loads a heavy hangar with an Su-27, consuming up to 1 GB of VRAM and causing stutters when opening F-10.\nSelecting a lightweight mode eliminates freezes and frees up video memory.",
+        "scene_opt_original": "DCS Original (heavy hangar with Su-27, default)",
+        "scene_opt_original_sub": "Stock scene: 3D bunker and aircraft models, textures and lights (consumes VRAM)",
+        "scene_opt_sky": "Clear Sky (Recommended)",
+        "scene_opt_sky_sub": "Lightweight procedural sky: saves up to 1 GB VRAM, eliminates freezes when opening F-10 map",
+        "scene_opt_black": "Black Void",
+        "scene_opt_black_sub": "Empty scene with black background: no environment graphics, maximum resource savings",
+        "scene_status_label": "Active in DCS:",
+        "scene_status_original": "Original (Hangar with Su-27)",
+        "scene_status_sky": "Clear Sky (Optimal)",
+        "scene_status_black": "Black Void",
+        "scene_status_unknown": "Unknown modification",
+        "scene_applied_status": "VR scene switched to \"{mode}\". Original backed up safely.",
+
+        # autoexec.cfg Card
+        "cfg_card_title": "Engine & Graphics Tweaks (autoexec.cfg)",
+        "cfg_card_desc": "Settings are written to Config\\autoexec.cfg as soon as they change. Other file lines are preserved.",
+        "cfg_badge_found": "File found",
+        "cfg_badge_missing": "File not found",
+        "cfg_badge_error": "Read error",
+        "cfg_dlss_name": "DLSS_Preset",
+        "cfg_dlss_desc": "DLSS preset. Choose J, K, L, or M, or enter a single Latin letter manually. K is used by default when enabled.",
+        "cfg_hud_name": "HUD_MFD_after_DLSS",
+        "cfg_hud_desc": "Keeps DLSS from being applied to HUD and MFD elements to help preserve their clarity.",
+        "cfg_track_name": "disable_write_track",
+        "cfg_track_desc": "Disables writing mission track files.",
+        "cfg_hotplug_name": "no_device_hotplug",
+        "cfg_hotplug_desc": "Disables periodic polling of connected devices, which can cause stutters.",
+        "cfg_shared_parser_name": "options.graphics.stereo_mode_use_shared_parser",
+        "cfg_shared_parser_desc": "Enables a VR optimization that may skip rendering invisible parts of the scene and slightly improve performance.",
+        "cfg_error_duplicate": "This setting occurs multiple times in the file. Editing is blocked to avoid changing an ambiguous value.",
+        "cfg_error_invalid": "The setting value uses an unsupported format. Editing is blocked.",
+        "cfg_invalid_preset_input": "Enter a single Latin letter for the DLSS preset.",
+        "cfg_path_unavailable": "Could not determine the autoexec.cfg path.",
+        "cfg_read_error": "Could not read autoexec.cfg: {error}",
+        "cfg_apply_error": "Could not apply \"{option}\":\n{error}",
+        "cfg_option_applied": "\"{option}\" applied.",
+        "cfg_option_unchanged": "\"{option}\" already has the selected value.",
+
+        # Backups Tab
+        "paths_title": "Game & Profile Directories",
+        "dcs_path_label": "DCS World Folder:",
+        "sg_path_label": "DCS Saved Games Folder:",
+        "btn_browse": "Browse...",
+        "btn_autodetect": "🔍 Auto-detect",
+        "dcs_path_hint": "💡 DCS World root folder (containing bin and Scripts folders)",
+        "sg_path_hint": "💡 User profile settings folder (containing Config\\options.lua)",
+        "path_valid_dcs": "✔ DCS World files detected",
+        "path_invalid_dcs": "✖ gameMessages.lua not found in this folder",
+        "path_valid_sg": "✔ options.lua detected",
+        "path_invalid_sg": "✖ options.lua not found in this folder",
+        "autodetect_found_msg": "DCS World paths detected automatically!",
+        "autodetect_not_found_msg": "Could not auto-detect DCS folder. Please select it via «Browse...».",
+        "clean_backup_title": "DCS Factory Originals",
+        "clean_backup_desc": "Untouched original DCS files are safely preserved in a permanent backup.\nYou can revert DCS to its factory default state at any time in one click.",
+        "clean_backup_status": "✔  Factory files protected and ready to restore",
+        "btn_restore_clean": "↺  Restore Factory Clean DCS",
+
+        # Footer
+        "status_ready": "Ready. Current DCS parameters loaded.",
+        "status_reloaded": "DCS files successfully reloaded from disk.",
+        "status_snapshot_created": "Backup snapshot created: {name}",
+
+        # Dialogs
+        "dialog_confirm_title": "Confirmation",
+        "dialog_restore_confirm": "Do you really want to restore factory clean DCS files?\nAll VR UI modifications will be reverted.",
+        "dialog_snapshot_confirm": "Restore files from snapshot {folder}?",
+        "dialog_success_title": "Success",
+        "dialog_error_title": "Error",
+        "dialog_no_custom_title": "Profile Not Saved",
+        "dialog_no_custom_msg": "You have not saved a custom profile yet.\n\nAdjust the desired settings on the \"Messages\" and \"Radio\" tabs, then click \"Save My Profile\" at the bottom.",
+        "dialog_custom_saved_only": "Current settings have been successfully saved to your profile!\n\nTo apply them to DCS World files, click 'Select My Profile' on the presets tab.",
+        "dialog_saved_msg": "Settings successfully applied to DCS World!\n\nFiles updated ({count}):\n{files}",
+        "dialog_saved_unchanged": "Settings saved. DCS files already match these values, no changes were needed.",
+        "dialog_reapply_msg": "Your profile was successfully applied in 1 click over updated DCS!\n\nFiles updated ({count}):\n{files}",
+        "dialog_reapply_unchanged": "Profile loaded. DCS files already match these values, no changes were needed.",
+        "dialog_restore_success": "Factory clean DCS files successfully restored ({count} files)!",
+        "dialog_backup_success": "Backup successfully restored ({count} files):\n{files}",
+        "dialog_error_apply": "Errors occurred while saving files:\n{errors}",
+        "dialog_btn_ok": "OK",
+        "dialog_btn_yes": "Yes",
+        "dialog_btn_cancel": "Cancel",
+
+        # About Dialog
+        "about_title": "About",
+        "btn_about": "ℹ About",
+        "btn_back": "Back",
+        "about_desc_1": "A tool for fine-tuning VR user interface, radio menu, and subtitles for DCS World.",
+        "about_desc_2": "Free and will remain so.",
+        "about_desc_3": "If you would like to support the project or simply show your appreciation, you can use the links below. It's entirely optional and always appreciated.",
+        "about_source_feedback": "Source code and feedback:",
+        "about_support_proj": "Support the project:",
+        "about_dev": "Developer: Hokum (Andrey Varlamov)",
+        "about_license": "License: MIT License",
+        "about_thanks": "Thank you for using this tool.",
+        "about_copied": "Copied!"
+    }
+}
+
+def t(key: str, lang: str = "ru", **kwargs) -> str:
+    lang_dict = STRINGS.get(lang, STRINGS["ru"])
+    val = lang_dict.get(key, STRINGS["ru"].get(key, key))
+    if kwargs:
+        try:
+            return val.format(**kwargs)
+        except Exception:
+            return val
+    return val
