@@ -62,8 +62,7 @@ The executable will be created in `dist/`.
 
 - On first launch, the app saves available original DCS files in `backups/original/`. The original `SceneVR.lua` is backed up before the first VR scene change.
 - The restore button restores saved originals for supported DCS files. `autoexec.cfg` is not included in this restoration.
-- Keep `backups/original/` if you want to use the restore feature. Do not publish the `backups/` folder; it may contain files from your DCS installation.
-- App settings and local paths are stored in `settings.json`, which is created automatically and should not be committed.
+- Keep `backups/original/` if you want to use the restore feature.
 
 ## License
 
@@ -133,8 +132,7 @@ py -3.12 -m PyInstaller --clean --noconfirm dcs_vr_ui_configurator.spec
 
 - При первом запуске программа сохраняет доступные оригинальные файлы DCS в `backups/original/`. Оригинал `SceneVR.lua` сохраняется перед первым переключением VR-сцены.
 - Кнопка восстановления возвращает сохранённые оригиналы поддерживаемых файлов DCS. `autoexec.cfg` в это восстановление не входит.
-- Не удаляйте `backups/original/`, если хотите пользоваться восстановлением. Не публикуйте папку `backups/`: в ней могут находиться файлы из вашей установки DCS.
-- Настройки программы и локальные пути хранятся в `settings.json`. Он создаётся автоматически и не должен попадать в репозиторий.
+- Не удаляйте `backups/original/`, если хотите пользоваться восстановлением.
 
 ## Лицензия
 
