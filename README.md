@@ -1,9 +1,9 @@
 # DCS World VR UI Configurator
 
-<a href="https://github.com/Hokum-A/dcs-vr-ui-configurator?tab=readme-ov-file#russian"><img src="docs/images/flag-ru.svg" alt="Русский" width="28"></a> [Русский — перейти к русской версии ↓](https://github.com/Hokum-A/dcs-vr-ui-configurator?tab=readme-ov-file#russian)
+[Русский — перейти к русской версии ↓](https://github.com/Hokum-A/dcs-vr-ui-configurator?tab=readme-ov-file#russian)
 
 <a id="english"></a>
-## English
+## <img src="docs/images/flag-uk.svg" alt="UK flag" width="28"> English
 
 A Windows application for customizing selected parts of the DCS World interface, with a focus on VR. Adjust message and radio menu sizing, choose the VR background scene used by the main menu and F-10 map, and manage supported `autoexec.cfg` tweaks.
 
@@ -72,9 +72,9 @@ This project is licensed under the [MIT License](LICENSE).
 ---
 
 <a id="russian"></a>
-## Русский
+## <img src="docs/images/flag-ru.svg" alt="Флаг России" width="28"> Русский
 
-<a href="https://github.com/Hokum-A/dcs-vr-ui-configurator?tab=readme-ov-file#english"><img src="docs/images/flag-uk.svg" alt="English" width="28"></a> [English — перейти к английской версии ↑](https://github.com/Hokum-A/dcs-vr-ui-configurator?tab=readme-ov-file#english)
+[English — перейти к английской версии ↑](https://github.com/Hokum-A/dcs-vr-ui-configurator?tab=readme-ov-file#english)
 
 Программа для Windows, предназначенная для настройки отдельных элементов интерфейса DCS World, в первую очередь в VR. Позволяет менять размеры сообщений и радиоменю, выбирать фоновую VR-сцену главного меню и карты F-10, а также управлять поддерживаемыми параметрами `autoexec.cfg`.
 
