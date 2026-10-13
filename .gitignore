@@ -218,3 +218,8 @@ __marimo__/
 
 # Streamlit
 .streamlit/secrets.toml
+
+# Локальные настройки и резервные копии
+settings.json
+backups/
+.vscode/
