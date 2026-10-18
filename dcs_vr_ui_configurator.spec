@@ -39,7 +39,7 @@ exe = EXE(
     a.binaries,
     a.datas,
     [],
-    name="DCS VR UI Configurator",
+    name="DCS-VR-UI-Configurator-v1.01-windows-x64",
     debug=False,
     bootloader_ignore_signals=False,
     strip=False,
