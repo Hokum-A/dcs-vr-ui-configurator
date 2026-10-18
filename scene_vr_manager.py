@@ -1,75 +1,11 @@
 import shutil
 from pathlib import Path
-from typing import Dict, Tuple
+from typing import Dict, Optional, Tuple
 from config import ORIGINAL_BACKUPS_DIR
 
 MODE_ORIGINAL = "original"
 MODE_SKY = "sky"
 MODE_BLACK = "black"
-
-# 1. Factory original DCS SceneVR.lua with hangar, Su-27, and lights
-ORIGINAL_LUA_CONTENT = '''package.path = package.path ..';./Scripts/DemoScenes/?.lua;'
-local sceneEnvironment = require("demosceneEnvironment")
-
-scene = {}
-
-function loadScene(scenePtr)
-\tsceneAPI = sceneEnvironment.getInterface(scenePtr)
-\tsceneAPI:setUpdateFunc('sceneVRUpdate')
-\tsceneAPI:setEnvironmentMap("Bazar/Graphics/VRMainScene.dds",0.9);
-\tsceneAPI:setSun(math.rad(-90), math.rad(0))
-
-\tscene.m\t\t\t= sceneAPI:addModel("su-27", 0, 2.4, 0);
-\tscene.m:setArgument(0, 1);
-\tscene.m:setArgument(3, 1);
-\tscene.m:setArgument(5, 1);
-\tscene.m:setArgument(4, 0.25);
-\tscene.m:setArgument(6, 0.25);
-\tscene.m:setArgument(115, 1);
-\tscene.m:setArgument(116, 1);
-\tscene.m:setArgument(117, 1);
-
-\tlocal cam_level = 1.8
-
-\tscene.cam\t\t= sceneAPI:addCamera(3, cam_level , 3)
-\tscene.cam:setFarClip(1000.0)
-\tscene.cam:setFov(90)
-\tscene.cam.transform:lookAtPoint(-10.0, cam_level, 0);
-
-\tscene.flr\t\t= sceneAPI:addModel("shelter_floor", 0,0,0);
-\tscene.flr:drawToEnvironment(true);
-\tscene.flr.transform:scale(2,1.5,1.5);
-
-\tscene.sh\t\t= sceneAPI:addModel("ukrytie", 0,0,0); 
-\tscene.sh:drawToEnvironment(true);
-\tscene.sh.transform:scale(2,2,2);
-
-\tscene.L1\t\t\t= sceneAPI:addLightOmni(0, 25, 0,\t1,0.8,0.5);
-\tscene.L1:setRadius(200);
-\tscene.L1:setAmount(1);
-
-\tscene.cam:setActive()
-
-\tpreloadList = 
-\t{
-\t\t{"su-27", \t\t  {}, {}},
-\t\t{"shelter_floor", {}, {}},
-\t\t{"ukrytie", \t  {}, {}},
-\t}
-\tsceneAPI:waitForModels(preloadList)\t
-end
-
---[0;1]
-local function pingpong(length, t)
-\tlocal tt = (t%length)*2/length
-\tif tt>1 then tt = 2-tt end
-\treturn tt
-end
-
-function sceneVRUpdate(t, dt)
-
-end
-'''
 
 # 2. Recommended lightweight procedural sky dome (no 3D models, zero VRAM overhead)
 SKY_LUA_CONTENT = '''package.path = package.path ..';./Scripts/DemoScenes/?.lua;'
@@ -141,6 +77,32 @@ end
 def get_scene_vr_file(target_files: Dict[str, Path]) -> Path:
     return target_files.get("SceneVR_lua")
 
+
+def get_original_scene_vr_file(target_files: Dict[str, Path]) -> Optional[Path]:
+    scene_file = get_scene_vr_file(target_files)
+    if not scene_file:
+        return None
+    return ORIGINAL_BACKUPS_DIR / scene_file.name
+
+
+def _looks_like_original_scene(content: bytes) -> bool:
+    return (
+        b"setSky(true)" not in content
+        and any(marker in content for marker in (b"su-27", b"ukrytie", b"waitForModels"))
+    )
+
+
+def has_valid_original_scene_vr_backup(target_files: Dict[str, Path]) -> bool:
+    backup_path = get_original_scene_vr_file(target_files)
+    if not backup_path or not backup_path.is_file():
+        return False
+    try:
+        content = backup_path.read_bytes()
+    except OSError:
+        return False
+    return _looks_like_original_scene(content)
+
+
 def detect_scene_vr_mode(target_files: Dict[str, Path]) -> str:
     """Returns 'original', 'sky', 'black', or 'unknown' based on the file contents."""
     file_path = get_scene_vr_file(target_files)
@@ -160,29 +122,42 @@ def detect_scene_vr_mode(target_files: Dict[str, Path]) -> str:
 
     return "unknown"
 
+
+def restore_scene_vr_original(target_files: Dict[str, Path]) -> Tuple[bool, str]:
+    """Restore the complete SceneVR.lua from the preserved original backup."""
+    file_path = get_scene_vr_file(target_files)
+    backup_path = get_original_scene_vr_file(target_files)
+    if not file_path or not backup_path:
+        return False, "Target file path not configured"
+    if not backup_path.is_file():
+        return False, f"Original backup not found: {backup_path}"
+    try:
+        file_path.parent.mkdir(parents=True, exist_ok=True)
+        shutil.copy2(backup_path, file_path)
+        return True, ""
+    except OSError as error:
+        return False, str(error)
+
+
 def ensure_scene_vr_backup(target_files: Dict[str, Path]) -> bool:
-    """Ensures pristine original backup of SceneVR.lua exists in backups/original/."""
-    ORIGINAL_BACKUPS_DIR.mkdir(parents=True, exist_ok=True)
-    backup_file = ORIGINAL_BACKUPS_DIR / "SceneVR.lua"
-    if backup_file.exists():
+    """Preserve the active factory scene and repair an invalid backup from it."""
+    backup_file = get_original_scene_vr_file(target_files)
+    if not backup_file:
+        return False
+    if has_valid_original_scene_vr_backup(target_files):
         return True
 
     file_path = get_scene_vr_file(target_files)
-    if file_path and file_path.exists():
-        try:
-            content = file_path.read_text(encoding="utf-8", errors="ignore")
-            # Only backup if current file is indeed the original
-            if "su-27" in content or "ukrytie" in content:
-                shutil.copy2(file_path, backup_file)
-                return True
-        except Exception:
-            pass
-
-    # If file was already modded or missing, write our known pristine original content
+    if not file_path or not file_path.is_file():
+        return False
     try:
-        backup_file.write_text(ORIGINAL_LUA_CONTENT, encoding="utf-8")
-        return True
-    except Exception:
+        content = file_path.read_bytes()
+        if not _looks_like_original_scene(content):
+            return False
+        ORIGINAL_BACKUPS_DIR.mkdir(parents=True, exist_ok=True)
+        backup_file.write_bytes(content)
+        return has_valid_original_scene_vr_backup(target_files)
+    except OSError:
         return False
 
 def apply_scene_vr_mode(target_files: Dict[str, Path], mode: str) -> Tuple[bool, str]:
@@ -191,14 +166,17 @@ def apply_scene_vr_mode(target_files: Dict[str, Path], mode: str) -> Tuple[bool,
     if not file_path:
         return False, "Target file path not configured"
 
+    if mode == MODE_ORIGINAL:
+        return restore_scene_vr_original(target_files)
+
     if not file_path.parent.exists():
         return False, f"Directory does not exist: {file_path.parent}"
 
     # Always ensure clean backup exists before applying any changes
-    ensure_scene_vr_backup(target_files)
+    if not ensure_scene_vr_backup(target_files):
+        return False, "Could not preserve the original SceneVR.lua before modification"
 
     content_map = {
-        MODE_ORIGINAL: ORIGINAL_LUA_CONTENT,
         MODE_SKY: SKY_LUA_CONTENT,
         MODE_BLACK: BLACK_LUA_CONTENT,
     }
@@ -210,5 +188,5 @@ def apply_scene_vr_mode(target_files: Dict[str, Path], mode: str) -> Tuple[bool,
     try:
         file_path.write_text(content, encoding="utf-8")
         return True, ""
-    except Exception as e:
+    except OSError as e:
         return False, str(e)

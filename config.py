@@ -12,7 +12,7 @@ SETTINGS_FILE = BASE_DIR / "settings.json"
 BACKUPS_DIR = BASE_DIR / "backups"
 ORIGINAL_BACKUPS_DIR = BACKUPS_DIR / "original"
 HISTORY_BACKUPS_DIR = BACKUPS_DIR / "history"
-APP_VERSION = "1.0"
+APP_VERSION = "1.01"
 
 DEFAULT_SETTINGS = {
     "dcs_path": r"C:\Program Files\Eagle Dynamics\DCS World",

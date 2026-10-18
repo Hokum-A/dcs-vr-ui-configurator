@@ -160,6 +160,16 @@ def format_profile_detailed(settings: Dict[str, Any], lang: str = "ru") -> str:
             f"Размер шрифта: {font_sz} pt",
             f"Радиоменю: {rw} × {rh}  •  VR масштаб: {r_scale:.2f}x",
         ]
+        scene_modes = {
+            "original": "Оригинальная VR-сцена",
+            "sky": "Чистое небо",
+            "black": "Черный минимализм",
+        }
+        if settings.get("scene_vr_mode") in scene_modes:
+            lines.append(f"VR-сцена: {scene_modes[settings['scene_vr_mode']]}")
+        if isinstance(settings.get("route_tool_enabled"), bool):
+            route_value = "AGL / RADIO, 1 м" if settings["route_tool_enabled"] else "выключена"
+            lines.append(f"Первая точка: {route_value}")
     else:
         mode_str = "Screen fraction" if mode == "fraction" else "Fixed px"
         if mode == "fixed":
@@ -172,4 +182,14 @@ def format_profile_detailed(settings: Dict[str, Any], lang: str = "ru") -> str:
             f"Font size: {font_sz} pt",
             f"Radio menu: {rw} × {rh}  •  VR scale: {r_scale:.2f}x",
         ]
+        scene_modes = {
+            "original": "DCS Original",
+            "sky": "Clear Sky",
+            "black": "Black Void",
+        }
+        if settings.get("scene_vr_mode") in scene_modes:
+            lines.append(f"VR scene: {scene_modes[settings['scene_vr_mode']]}")
+        if isinstance(settings.get("route_tool_enabled"), bool):
+            route_value = "AGL / RADIO, 1 m" if settings["route_tool_enabled"] else "disabled"
+            lines.append(f"First waypoint: {route_value}")
     return "\n".join(lines)

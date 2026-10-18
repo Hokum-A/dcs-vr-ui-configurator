@@ -8,7 +8,12 @@ import customtkinter as ctk
 from pathlib import Path
 from PIL import Image, ImageDraw, ImageTk
 
-from config import load_settings, save_settings, get_target_files, APP_VERSION
+from config import (
+    load_settings,
+    save_settings,
+    get_target_files,
+    APP_VERSION,
+)
 from backup_manager import (
     ensure_clean_backup,
     restore_clean_original
@@ -790,9 +795,24 @@ class CTkDarkMessageBox(ctk.CTkToplevel):
         self.transient(parent)
         self.grab_set()
 
-        # Dynamic sizing based on lines and message length
-        lines = message.splitlines()
-        num_lines = max(len(lines), 1)
+        message_font = ctk.CTkFont(size=12)
+        num_lines = 0
+        for paragraph in message.splitlines() or [""]:
+            words = paragraph.split()
+            if not words:
+                num_lines += 1
+                continue
+            paragraph_lines = 1
+            current_line = words[0]
+            for word in words[1:]:
+                candidate = f"{current_line} {word}"
+                if message_font.measure(candidate) > 400:
+                    paragraph_lines += 1
+                    current_line = word
+                else:
+                    current_line = candidate
+            num_lines += paragraph_lines
+
         dw = 460
         dh = max(200, 140 + min(num_lines * 22, 220))
 
@@ -847,7 +867,7 @@ class CTkDarkMessageBox(ctk.CTkToplevel):
         msg_lbl = ctk.CTkLabel(
             main_frame,
             text=message,
-            font=ctk.CTkFont(size=12),
+            font=message_font,
             text_color=THEME["text_primary"],
             wraplength=400,
             justify="left",
@@ -1123,15 +1143,19 @@ class DcsVrUiEditorApp(ctk.CTk):
         self.dcs_path = self.app_settings.get("dcs_path", r"F:\GAMES\DCS World")
         self.saved_games_path = self.app_settings.get("saved_games_path", str(Path.home() / "Saved Games" / "DCS.openbeta"))
 
-        # Setup window sizing and centering (1300 x 766, minsize 1260 x 760 to ensure full tab visibility)
+        # Keep enough room for the optimization controls and footer without excess space below.
         init_w = max(1300, int(self.app_settings.get("window_width", 1320)))
-        init_h = max(760, int(self.app_settings.get("window_height", 760)))
-        self.minsize(1320, 760)
-
-        # Center on screen
+        saved_h = int(self.app_settings.get("window_height", 780))
+        init_h = 780 if saved_h == 820 else max(780, saved_h)
         self.update_idletasks()
         screen_w = self.winfo_screenwidth()
         screen_h = self.winfo_screenheight()
+        available_h = max(600, screen_h - 80)
+        min_h = min(780, available_h)
+        init_h = min(init_h, available_h)
+        self.minsize(1320, min_h)
+
+        # Center on screen
         pos_x = max(0, (screen_w - init_w) // 2)
         pos_y = max(0, (screen_h - init_h) // 2)
         self.geometry(f"{init_w}x{init_h}+{pos_x}+{pos_y}")
@@ -1141,9 +1165,14 @@ class DcsVrUiEditorApp(ctk.CTk):
 
         # Target files dictionary
         self.target_files = get_target_files(self.dcs_path, self.saved_games_path)
+        self.route_tool_path = Path(self.dcs_path) / "Scripts" / "UI" / "RouteTool" / "RouteTool.lua"
+        from route_tool_manager import ensure_route_tool_original_backup
+        ensure_route_tool_original_backup(self.route_tool_path)
 
         # Ensure factory originals are backed up upon launch
         self.backed_up_files = ensure_clean_backup(self.target_files)
+        from scene_vr_manager import ensure_scene_vr_backup
+        ensure_scene_vr_backup(self.target_files)
 
         # State cache
         self.current_live_state = read_current_state(self.target_files)
@@ -1559,8 +1588,29 @@ class DcsVrUiEditorApp(ctk.CTk):
             return
         p_settings = PRESETS[preset_key]["settings"]
 
+        ready, error = self._preflight_builtin_options()
+        if not ready:
+            self.show_dark_error(
+                t("dialog_error_title", self.current_lang),
+                t("builtin_preset_originals_error", self.current_lang, error=error)
+            )
+            return
+
+        option_files, option_errors = self._restore_builtin_options()
+        if option_errors:
+            if option_files:
+                self._sync_builtin_option_ui()
+            error_text = "\n".join(f"• {error}" for error in option_errors)
+            self.show_dark_error(
+                t("dialog_error_title", self.current_lang),
+                t("dialog_error_apply", self.current_lang, errors=error_text)
+            )
+            return
+
         # 1. Write preset settings to DCS files
         success, updated_files, errors = apply_settings(self.target_files, p_settings)
+        updated_files.extend(option_files)
+        self._sync_builtin_option_ui()
 
         # 3. Update working_state AND sync sliders so user sees values to tweak from
         self.working_state.update(p_settings)
@@ -1601,6 +1651,9 @@ class DcsVrUiEditorApp(ctk.CTk):
 
         # 1. Write saved custom profile to DCS files
         success, updated_files, errors = apply_settings(self.target_files, saved)
+        option_files, option_errors = self.apply_custom_profile_options(saved)
+        updated_files.extend(option_files)
+        errors.extend(option_errors)
 
         # 3. Update working_state and sync sliders
         self.working_state.update(saved)
@@ -1617,29 +1670,265 @@ class DcsVrUiEditorApp(ctk.CTk):
         self.update_presets_tab_display()
 
         if success:
-            if updated_files:
+            if errors:
+                err_str = "\n".join(f"• {error}" for error in errors)
+                msg = t("dialog_error_apply", self.current_lang, errors=err_str)
+                self.show_dark_error(t("dialog_error_title", self.current_lang), msg)
+            elif updated_files:
                 files_str = "\n".join(f"• {f}" for f in updated_files)
                 msg = t("dialog_saved_msg", self.current_lang, count=len(updated_files), files=files_str)
+                self.show_dark_info(t("dialog_success_title", self.current_lang), msg)
             else:
-                msg = t("preset_loaded_custom_no_changes", self.current_lang)
-            self.show_dark_info(t("dialog_success_title", self.current_lang), msg)
+                self.show_dark_info(
+                    t("dialog_success_title", self.current_lang),
+                    t("preset_loaded_custom_no_changes", self.current_lang)
+                )
         else:
             err_str = "\n".join(f"• {e}" for e in errors)
             msg = t("dialog_error_apply", self.current_lang, errors=err_str)
             self.show_dark_error(t("dialog_error_title", self.current_lang), msg)
 
+    def _preflight_builtin_options(self):
+        """Verify preserved originals and readable targets before changing any preset files."""
+        from scene_vr_manager import (
+            ensure_scene_vr_backup,
+            get_original_scene_vr_file,
+            get_scene_vr_file,
+            has_valid_original_scene_vr_backup,
+        )
+        from route_tool_manager import (
+            RouteToolError,
+            read_original_route_tool_defaults,
+            read_route_tool_defaults,
+        )
+
+        scene_path = get_scene_vr_file(self.target_files)
+        original_scene_path = get_original_scene_vr_file(self.target_files)
+        if not scene_path or not scene_path.is_file():
+            return False, t("builtin_preset_scene_target_missing", self.current_lang)
+        ensure_scene_vr_backup(self.target_files)
+        if not original_scene_path or not original_scene_path.is_file():
+            return False, t("builtin_preset_scene_backup_missing", self.current_lang)
+        try:
+            scene_path.read_bytes()
+            original_scene_path.read_bytes()
+            if not has_valid_original_scene_vr_backup(self.target_files):
+                return False, t("builtin_preset_scene_backup_invalid", self.current_lang)
+            read_route_tool_defaults(self.route_tool_path)
+            read_original_route_tool_defaults(self.route_tool_path)
+        except RouteToolError:
+            return False, t("builtin_preset_route_backup_invalid", self.current_lang)
+        except (OSError, ValueError):
+            return False, t("builtin_preset_files_unreadable", self.current_lang)
+        return True, ""
+
+    def _restore_builtin_options(self):
+        """Restore preserved SceneVR and waypoint defaults for a built-in preset."""
+        from scene_vr_manager import (
+            get_original_scene_vr_file,
+            get_scene_vr_file,
+            restore_scene_vr_original,
+        )
+        from route_tool_manager import RouteToolError, restore_route_tool_original
+
+        updated_files = []
+        errors = []
+        try:
+            scene_path = get_scene_vr_file(self.target_files)
+            original_scene_path = get_original_scene_vr_file(self.target_files)
+            scene_changed = (
+                scene_path.read_bytes() != original_scene_path.read_bytes()
+            )
+            if restore_route_tool_original(self.route_tool_path):
+                updated_files.append("RouteTool.lua")
+            success, error = restore_scene_vr_original(self.target_files)
+            if not success:
+                errors.append(error)
+            elif scene_changed:
+                updated_files.append("SceneVR.lua")
+        except (OSError, ValueError, RouteToolError) as error:
+            errors.append(str(error))
+        return updated_files, errors
+
+    def _sync_builtin_option_ui(self):
+        from scene_vr_manager import detect_scene_vr_mode
+
+        if hasattr(self, "var_scene_mode"):
+            self.var_scene_mode.set(detect_scene_vr_mode(self.target_files))
+            self.refresh_scene_original_control()
+            self.update_scene_vr_badge()
+        if hasattr(self, "switch_route_tool"):
+            self.refresh_route_tool_control()
+        self.current_live_state = read_current_state(self.target_files)
+        self.update_presets_tab_display()
+
+    def refresh_scene_original_control(self):
+        from scene_vr_manager import has_valid_original_scene_vr_backup
+
+        if not hasattr(self, "rb_scene_orig"):
+            return
+        available = has_valid_original_scene_vr_backup(self.target_files)
+        self.rb_scene_orig.configure(state="normal" if available else "disabled")
+        if hasattr(self, "lbl_scene_original_warning"):
+            if available:
+                self.lbl_scene_original_warning.pack_forget()
+            else:
+                self.lbl_scene_original_warning.configure(
+                    text=t("scene_original_backup_unavailable", self.current_lang)
+                )
+                self.lbl_scene_original_warning.pack(
+                    anchor="w",
+                    padx=(52, 12),
+                    pady=(0, 8)
+                )
+
+    def _scene_matches_original(self):
+        from scene_vr_manager import get_original_scene_vr_file, get_scene_vr_file
+
+        scene_path = get_scene_vr_file(self.target_files)
+        original_scene_path = get_original_scene_vr_file(self.target_files)
+        try:
+            return bool(
+                scene_path
+                and original_scene_path
+                and scene_path.read_bytes() == original_scene_path.read_bytes()
+            )
+        except OSError:
+            return False
+
+    def _builtin_options_match_live(self):
+        """Return True/False when classifiable, otherwise None."""
+        from scene_vr_manager import (
+            MODE_BLACK,
+            MODE_ORIGINAL,
+            MODE_SKY,
+            detect_scene_vr_mode,
+            has_valid_original_scene_vr_backup,
+        )
+        from route_tool_manager import (
+            RouteToolError,
+            read_original_route_tool_defaults,
+            read_route_tool_defaults,
+        )
+
+        try:
+            scene_mode = detect_scene_vr_mode(self.target_files)
+            if scene_mode in (MODE_SKY, MODE_BLACK):
+                return False
+            if scene_mode != MODE_ORIGINAL or not has_valid_original_scene_vr_backup(self.target_files):
+                return None
+            scene_matches_original = self._scene_matches_original()
+            if not scene_matches_original:
+                return False
+            return (
+                read_route_tool_defaults(self.route_tool_path)
+                == read_original_route_tool_defaults(self.route_tool_path)
+            )
+        except (OSError, ValueError, RouteToolError):
+            return None
+
+    @staticmethod
+    def _profile_matches_builtin_options(profile):
+        from scene_vr_manager import MODE_ORIGINAL
+
+        return (
+            profile.get("scene_vr_mode") == MODE_ORIGINAL
+            and profile.get("route_tool_enabled") is False
+        )
+
+    def apply_custom_profile_options(self, profile):
+        """Applies saved optimization settings without changing autoexec.cfg."""
+        updated_files = []
+        errors = []
+
+        if "scene_vr_mode" in profile:
+            from scene_vr_manager import (
+                MODE_BLACK,
+                MODE_ORIGINAL,
+                MODE_SKY,
+                apply_scene_vr_mode,
+                detect_scene_vr_mode,
+                has_valid_original_scene_vr_backup,
+            )
+
+            mode = profile["scene_vr_mode"]
+            if mode not in (MODE_ORIGINAL, MODE_SKY, MODE_BLACK):
+                errors.append(t("custom_profile_invalid_scene"))
+            else:
+                previous_mode = detect_scene_vr_mode(self.target_files)
+                if mode == MODE_ORIGINAL:
+                    from scene_vr_manager import (
+                        get_original_scene_vr_file,
+                        get_scene_vr_file,
+                        restore_scene_vr_original,
+                    )
+                    scene_path = get_scene_vr_file(self.target_files)
+                    original_scene_path = get_original_scene_vr_file(self.target_files)
+                    if not has_valid_original_scene_vr_backup(self.target_files):
+                        success = False
+                        error = t("custom_profile_scene_original_unavailable", self.current_lang)
+                        scene_changed = False
+                    else:
+                        try:
+                            previous_content = scene_path.read_bytes() if scene_path else None
+                            original_content = original_scene_path.read_bytes()
+                            success, error = restore_scene_vr_original(self.target_files)
+                            scene_changed = success and previous_content != original_content
+                        except OSError as read_error:
+                            success, error = False, str(read_error)
+                            scene_changed = False
+                else:
+                    success, error = apply_scene_vr_mode(self.target_files, mode)
+                    scene_changed = previous_mode != mode
+                if success:
+                    self.var_scene_mode.set(mode)
+                else:
+                    self.var_scene_mode.set(detect_scene_vr_mode(self.target_files))
+                    errors.append(t("custom_profile_scene_error", error=error))
+                self.refresh_scene_original_control()
+                self.update_scene_vr_badge()
+                if success:
+                    if scene_changed:
+                        updated_files.append("SceneVR.lua")
+
+        if "route_tool_enabled" in profile:
+            from route_tool_manager import RouteToolError, set_route_tool_enabled
+
+            enabled = profile["route_tool_enabled"]
+            if not isinstance(enabled, bool):
+                errors.append(t("custom_profile_invalid_route"))
+            else:
+                try:
+                    if set_route_tool_enabled(self.route_tool_path, enabled):
+                        updated_files.append("RouteTool.lua")
+                    self.var_route_tool_enabled.set(enabled)
+                    self.refresh_route_tool_control()
+                except (OSError, RouteToolError) as error:
+                    self.refresh_route_tool_control()
+                    errors.append(t("custom_profile_route_error", error=str(error)))
+
+        return updated_files, errors
+
     def action_save_custom_profile(self):
         """Saves current working_state into saved_custom_profile.
         If current active profile is custom, also applies to DCS files.
         Otherwise, only saves profile without modifying DCS files."""
-        self.app_settings["saved_custom_profile"] = self.working_state.copy()
+        saved_profile = self.working_state.copy()
+        saved_profile["scene_vr_mode"] = self.var_scene_mode.get()
+        saved_profile["route_tool_enabled"] = bool(self.var_route_tool_enabled.get())
+        self.app_settings["saved_custom_profile"] = saved_profile
 
         # Check which profile is physically active on disk
-        live_key = "custom"
-        for k, pdata in PRESETS.items():
-            if matches_settings(self.current_live_state, pdata["settings"]):
-                live_key = k
-                break
+        live_options_match_builtin = self._builtin_options_match_live()
+        live_key = None
+        if live_options_match_builtin is False:
+            live_key = "custom"
+        elif live_options_match_builtin is True:
+            live_key = "custom"
+            for k, pdata in PRESETS.items():
+                if matches_settings(self.current_live_state, pdata["settings"]):
+                    live_key = k
+                    break
 
         is_custom_active = (self.app_settings.get("active_preset") == "custom" or live_key == "custom")
 
@@ -1648,16 +1937,26 @@ class DcsVrUiEditorApp(ctk.CTk):
             self.app_settings["active_preset"] = "custom"
             save_settings(self.app_settings)
             success, updated_files, errors = apply_settings(self.target_files, self.working_state)
+            option_files, option_errors = self.apply_custom_profile_options(saved_profile)
+            updated_files.extend(option_files)
+            errors.extend(option_errors)
             if success:
                 self.current_live_state = read_current_state(self.target_files)
                 self.update_status_by_key("status_ready")
                 self.update_presets_tab_display()
-                if updated_files:
+                if errors:
+                    err_str = "\n".join(f"• {error}" for error in errors)
+                    msg = t("dialog_error_apply", self.current_lang, errors=err_str)
+                    self.show_dark_error(t("dialog_error_title", self.current_lang), msg)
+                elif updated_files:
                     files_str = "\n".join(f"• {f}" for f in updated_files)
                     msg = t("dialog_saved_msg", self.current_lang, count=len(updated_files), files=files_str)
+                    self.show_dark_info(t("dialog_success_title", self.current_lang), msg)
                 else:
-                    msg = t("dialog_saved_unchanged", self.current_lang)
-                self.show_dark_info(t("dialog_success_title", self.current_lang), msg)
+                    self.show_dark_info(
+                        t("dialog_success_title", self.current_lang),
+                        t("dialog_saved_unchanged", self.current_lang)
+                    )
             else:
                 err_str = "\n".join(f"• {e}" for e in errors)
                 msg = t("dialog_error_apply", self.current_lang, errors=err_str)
@@ -1675,23 +1974,59 @@ class DcsVrUiEditorApp(ctk.CTk):
             return
 
         # 1. Determine which card matches files physically on disk (current_live_state)
-        live_key = "custom"
-        for k, pdata in PRESETS.items():
-            if matches_settings(self.current_live_state, pdata["settings"]):
-                live_key = k
-                break
+        live_options_match_builtin = self._builtin_options_match_live()
+        live_key = None
+        if live_options_match_builtin is False:
+            live_key = "custom"
+        elif live_options_match_builtin is True:
+            live_key = "custom"
+            for k, pdata in PRESETS.items():
+                if matches_settings(self.current_live_state, pdata["settings"]):
+                    live_key = k
+                    break
 
         # 2. Determine which card matches working_state (currently in editor sliders)
         working_key = "custom"
-        for k, pdata in PRESETS.items():
-            if matches_settings(self.working_state, pdata["settings"]):
-                working_key = k
-                break
+        working_options_are_original = (
+            not hasattr(self, "var_scene_mode")
+            or self.var_scene_mode.get() == "original"
+        ) and (
+            not hasattr(self, "var_route_tool_enabled")
+            or not bool(self.var_route_tool_enabled.get())
+        )
+        if working_options_are_original:
+            for k, pdata in PRESETS.items():
+                if matches_settings(self.working_state, pdata["settings"]):
+                    working_key = k
+                    break
 
         # Update detailed description for custom card with current saved settings
         saved_profile = self.app_settings.get("saved_custom_profile", {})
         has_saved_profile = bool(saved_profile)
         is_live_matching_saved = has_saved_profile and matches_settings(self.current_live_state, saved_profile)
+        if is_live_matching_saved and "scene_vr_mode" in saved_profile:
+            from scene_vr_manager import detect_scene_vr_mode
+            if saved_profile["scene_vr_mode"] == "original":
+                is_live_matching_saved = self._scene_matches_original()
+            else:
+                is_live_matching_saved = (
+                    detect_scene_vr_mode(self.target_files) == saved_profile["scene_vr_mode"]
+                )
+        elif is_live_matching_saved:
+            is_live_matching_saved = False
+        if is_live_matching_saved and "route_tool_enabled" in saved_profile:
+            from route_tool_manager import is_route_tool_enabled, read_route_tool_defaults
+            try:
+                current_route_setting = is_route_tool_enabled(
+                    read_route_tool_defaults(self.route_tool_path)
+                )
+                is_live_matching_saved = current_route_setting == saved_profile["route_tool_enabled"]
+            except (OSError, ValueError):
+                is_live_matching_saved = False
+        elif is_live_matching_saved:
+            is_live_matching_saved = False
+        if live_key is None and is_live_matching_saved:
+            live_key = "custom"
 
         if "custom" in self.preset_widgets:
             if has_saved_profile:
@@ -1717,10 +2052,11 @@ class DcsVrUiEditorApp(ctk.CTk):
         # Check if saved_custom_profile matches any standard preset
         matching_preset_key = None
         if saved_profile:
-            for pk, pdata in PRESETS.items():
-                if matches_settings(saved_profile, pdata["settings"]):
-                    matching_preset_key = pk
-                    break
+            if self._profile_matches_builtin_options(saved_profile):
+                for pk, pdata in PRESETS.items():
+                    if matches_settings(saved_profile, pdata["settings"]):
+                        matching_preset_key = pk
+                        break
 
         if hasattr(self, "lbl_custom_match"):
             self.lbl_custom_match.pack_forget()
@@ -1754,16 +2090,22 @@ class DcsVrUiEditorApp(ctk.CTk):
                     match_text = t("custom_matches_preset", self.current_lang, name=short_title)
                     self.lbl_custom_match.configure(text=match_text)
                     self.lbl_custom_match.pack(side="left", padx=(0, 10))
+                    if k == live_key:
+                        badge_text = (
+                            "badge_active_dcs"
+                            if is_live_matching_saved
+                            else "badge_active_dcs_unsaved"
+                        )
+                        badge_active.configure(text=t(badge_text, self.current_lang))
+                        badge_active.pack(side="right", padx=(0, 6))
                     btn.pack(side="right")
                 elif k == live_key:
                     if is_live_matching_saved:
                         badge_active.configure(text=t("badge_active_dcs", self.current_lang))
                         badge_active.pack(side="right", padx=(0, 6))
-                    elif not has_saved_profile:
+                    else:
                         badge_active.configure(text=t("badge_active_dcs_unsaved", self.current_lang))
                         badge_active.pack(side="right", padx=(0, 6))
-                    else:
-                        # Saved profile exists, but DCS has different unsaved edits -> allow loading saved profile
                         btn.pack(side="right")
                 else:
                     btn.pack(side="right")
@@ -2101,7 +2443,14 @@ class DcsVrUiEditorApp(ctk.CTk):
 
     # ---------------- TAB 5: OPTIMIZATION & TWEAKS ----------------
     def build_tweaks_tab(self):
-        container = ctk.CTkFrame(self.tab_tweaks, fg_color="transparent")
+        container = ctk.CTkScrollableFrame(
+            self.tab_tweaks,
+            fg_color="transparent",
+            scrollbar_fg_color=THEME["header_bg"],
+            scrollbar_button_color=THEME["accent_amber"],
+            scrollbar_button_hover_color=THEME["accent_gold"]
+        )
+        container._scrollbar.configure(width=20, corner_radius=10)
         container.pack(fill="both", expand=True, padx=10, pady=6)
 
         # 1. VR Background Scene Card (SceneVR.lua)
@@ -2113,9 +2462,30 @@ class DcsVrUiEditorApp(ctk.CTk):
 
         self.lbl_scene_title = ctk.CTkLabel(
             header_frame, text=t("scene_card_title", self.current_lang),
-            font=ctk.CTkFont(size=14, weight="bold"), text_color=THEME["accent_gold"]
+            font=ctk.CTkFont(size=14, weight="bold"), text_color=THEME["accent_gold"],
+            justify="left"
         )
         self.lbl_scene_title.pack(side="left")
+
+        shield_path = Path(__file__).resolve().parent / "shield.png"
+        if shield_path.exists():
+            shield_image = Image.open(shield_path).convert("RGBA")
+            self.scene_shield_image = ctk.CTkImage(
+                light_image=shield_image,
+                dark_image=shield_image,
+                size=(20, 20)
+            )
+            shield_label = ctk.CTkLabel(
+                header_frame,
+                text="",
+                image=self.scene_shield_image,
+                cursor="hand2"
+            )
+            shield_label.pack(side="left", padx=(7, 0))
+            HoverTooltip(
+                shield_label,
+                lambda: t("scene_integrity_tooltip", self.current_lang)
+            )
 
         self.lbl_scene_badge = ctk.CTkLabel(
             header_frame, text="",
@@ -2125,7 +2495,8 @@ class DcsVrUiEditorApp(ctk.CTk):
 
         self.lbl_scene_desc = ctk.CTkLabel(
             scene_card, text=t("scene_card_desc", self.current_lang),
-            font=ctk.CTkFont(size=12), text_color=THEME["text_secondary"], justify="left"
+            font=ctk.CTkFont(size=13), text_color=THEME["text_secondary"], justify="left",
+            wraplength=690
         )
         self.lbl_scene_desc.pack(anchor="w", padx=15, pady=(0, 10))
 
@@ -2134,8 +2505,6 @@ class DcsVrUiEditorApp(ctk.CTk):
 
         from scene_vr_manager import detect_scene_vr_mode, MODE_SKY, MODE_ORIGINAL, MODE_BLACK
         current_mode = detect_scene_vr_mode(self.target_files)
-        if current_mode == "unknown":
-            current_mode = MODE_ORIGINAL
         self.var_scene_mode = tk.StringVar(value=current_mode)
 
         def make_scene_radio_row(parent, value, title_key, sub_key):
@@ -2158,9 +2527,10 @@ class DcsVrUiEditorApp(ctk.CTk):
             sub_lbl = ctk.CTkLabel(
                 row_frame,
                 text=t(sub_key, self.current_lang),
-                font=ctk.CTkFont(size=12),
+                font=ctk.CTkFont(size=13),
                 text_color=THEME["text_secondary"],
-                justify="left"
+                justify="left",
+                wraplength=650
             )
             sub_lbl.pack(anchor="w", padx=(28, 0), pady=(1, 0))
             return rb, sub_lbl
@@ -2174,10 +2544,116 @@ class DcsVrUiEditorApp(ctk.CTk):
         self.rb_scene_orig, self.lbl_scene_orig_sub = make_scene_radio_row(
             opts_box, MODE_ORIGINAL, "scene_opt_original", "scene_opt_original_sub"
         )
+        self.lbl_scene_original_warning = ctk.CTkLabel(
+            opts_box,
+            text="",
+            font=ctk.CTkFont(size=11),
+            text_color=THEME["status_amber_text"],
+            justify="left",
+            wraplength=700
+        )
+        self.refresh_scene_original_control()
 
+        def resize_scene_text(event):
+            wraplength = max(160, event.width - 40)
+            self.lbl_scene_desc.configure(wraplength=wraplength)
+            self.lbl_scene_sky_sub.configure(wraplength=wraplength - 28)
+            self.lbl_scene_black_sub.configure(wraplength=wraplength - 28)
+            self.lbl_scene_orig_sub.configure(wraplength=wraplength - 28)
+            self.lbl_scene_original_warning.configure(wraplength=wraplength - 64)
+
+        scene_card.bind("<Configure>", resize_scene_text, add="+")
         self.update_scene_vr_badge()
 
-        # 2. Engine & Graphics Tweaks (autoexec.cfg)
+        # 2. Default first waypoint altitude and type (RouteTool.lua)
+        route_card = ctk.CTkFrame(container, corner_radius=8, fg_color=THEME["card_bg"], border_width=1, border_color=THEME["card_border"])
+        route_card.pack(fill="x", pady=6, padx=4)
+
+        route_header = ctk.CTkFrame(route_card, fg_color="transparent")
+        route_header.pack(fill="x", padx=15, pady=(10, 2))
+
+        self.lbl_route_tool_title = ctk.CTkLabel(
+            route_header,
+            text=t("route_tool_card_title", self.current_lang),
+            font=ctk.CTkFont(size=14, weight="bold"),
+            text_color=THEME["accent_gold"],
+            justify="left",
+            anchor="w"
+        )
+        self.lbl_route_tool_title.pack(side="left")
+
+        route_shield_path = Path(__file__).resolve().parent / "shield.png"
+        if route_shield_path.exists():
+            route_shield_raw = Image.open(route_shield_path).convert("RGBA")
+            self.route_tool_shield_image = ctk.CTkImage(
+                light_image=route_shield_raw,
+                dark_image=route_shield_raw,
+                size=(20, 20)
+            )
+            self.route_tool_shield_label = ctk.CTkLabel(
+                route_header,
+                text="",
+                image=self.route_tool_shield_image,
+                cursor="hand2"
+            )
+            self.route_tool_shield_label.pack(side="left", padx=(7, 0))
+            HoverTooltip(
+                self.route_tool_shield_label,
+                lambda: t("route_tool_integrity_tooltip", self.current_lang)
+            )
+
+        self.lbl_route_tool_desc = ctk.CTkLabel(
+            route_card,
+            text=t("route_tool_card_desc", self.current_lang),
+            font=ctk.CTkFont(size=13),
+            text_color=THEME["text_secondary"],
+            justify="left",
+            anchor="w"
+        )
+        self.lbl_route_tool_desc.pack(fill="x", padx=15, pady=(0, 10))
+
+        def resize_route_tool_description(event):
+            wraplength = max(160, event.width - 40)
+            self.lbl_route_tool_title.configure(wraplength=max(160, wraplength - 60))
+            self.lbl_route_tool_desc.configure(wraplength=wraplength)
+            self.lbl_route_tool_error.configure(wraplength=wraplength - 24)
+
+        route_controls = ctk.CTkFrame(
+            route_card,
+            fg_color=THEME["sub_box_bg"],
+            corner_radius=6,
+            border_width=1,
+            border_color="#363a45"
+        )
+        route_controls.pack(fill="x", padx=15, pady=(0, 14))
+        self.var_route_tool_enabled = tk.BooleanVar(value=False)
+        self.switch_route_tool = ctk.CTkSwitch(
+            route_controls,
+            text=t("route_tool_switch", self.current_lang),
+            variable=self.var_route_tool_enabled,
+            command=self.on_route_tool_toggled,
+            font=ctk.CTkFont(size=13, weight="bold"),
+            progress_color=THEME["accent_amber"],
+            button_color=THEME["text_primary"],
+            button_hover_color=THEME["text_primary"],
+            text_color=THEME["text_primary"],
+            onvalue=True,
+            offvalue=False
+        )
+        self.switch_route_tool.pack(anchor="w", padx=12, pady=(12, 6))
+        self.lbl_route_tool_error = ctk.CTkLabel(
+            route_controls,
+            text="",
+            font=ctk.CTkFont(size=12),
+            text_color=THEME["status_amber_text"],
+            justify="left",
+            wraplength=420
+        )
+        self.lbl_route_tool_error.pack(anchor="w", padx=(12, 12), pady=(0, 10))
+        route_card.bind("<Configure>", resize_route_tool_description, add="+")
+        self.refresh_route_tool_control()
+
+        # 3. Engine & Graphics Tweaks (autoexec.cfg)
         cfg_card = ctk.CTkFrame(container, corner_radius=8, fg_color=THEME["card_bg"], border_width=1, border_color=THEME["card_border"])
         cfg_card.pack(fill="x", pady=6, padx=4)
 
@@ -2448,16 +2924,78 @@ class DcsVrUiEditorApp(ctk.CTk):
             )
 
     def on_scene_mode_changed(self):
-        from scene_vr_manager import apply_scene_vr_mode
+        from scene_vr_manager import apply_scene_vr_mode, detect_scene_vr_mode
         mode = self.var_scene_mode.get()
         success, err = apply_scene_vr_mode(self.target_files, mode)
         if success:
+            self.refresh_scene_original_control()
             self.update_scene_vr_badge()
+            self.update_presets_tab_display()
             mode_name = t(f"scene_status_{mode}", self.current_lang)
             self.update_status_by_key("scene_applied_status", mode=mode_name)
         else:
+            self.var_scene_mode.set(detect_scene_vr_mode(self.target_files))
+            self.refresh_scene_original_control()
+            self.update_scene_vr_badge()
+            self.update_presets_tab_display()
             err_msg = f"Не удалось изменить SceneVR.lua:\n{err}" if self.current_lang == "ru" else f"Failed to update SceneVR.lua:\n{err}"
             self.show_dark_error(t("dialog_error_title", self.current_lang), err_msg)
+
+    def refresh_route_tool_control(self):
+        from route_tool_manager import (
+            RouteToolError,
+            ensure_route_tool_baseline,
+            is_route_tool_enabled,
+            read_route_tool_defaults,
+        )
+
+        if not hasattr(self, "switch_route_tool"):
+            return
+
+        if not self.route_tool_path.is_file():
+            self.var_route_tool_enabled.set(False)
+            self.switch_route_tool.configure(state="disabled")
+            self.lbl_route_tool_error.configure(text=t("route_tool_file_missing", self.current_lang))
+            return
+
+        try:
+            defaults = read_route_tool_defaults(self.route_tool_path)
+            is_enabled = is_route_tool_enabled(defaults)
+            baseline_available = ensure_route_tool_baseline(self.route_tool_path)
+        except (OSError, RouteToolError) as error:
+            self.var_route_tool_enabled.set(False)
+            self.switch_route_tool.configure(state="disabled")
+            self.lbl_route_tool_error.configure(
+                text=t("route_tool_read_error", self.current_lang, error=str(error))
+            )
+            return
+
+        self.var_route_tool_enabled.set(is_enabled)
+        self.switch_route_tool.configure(state="normal" if (not is_enabled or baseline_available) else "disabled")
+        if is_enabled and not baseline_available:
+            self.lbl_route_tool_error.configure(text=t("route_tool_baseline_missing", self.current_lang))
+        else:
+            self.lbl_route_tool_error.configure(text="")
+
+    def on_route_tool_toggled(self):
+        from route_tool_manager import RouteToolError, set_route_tool_enabled
+
+        try:
+            changed = set_route_tool_enabled(
+                self.route_tool_path,
+                bool(self.var_route_tool_enabled.get())
+            )
+            self.refresh_route_tool_control()
+            self.update_presets_tab_display()
+            self.update_status_by_key(
+                "route_tool_applied" if changed else "route_tool_unchanged"
+            )
+        except (OSError, RouteToolError) as error:
+            self.refresh_route_tool_control()
+            self.show_dark_error(
+                t("dialog_error_title", self.current_lang),
+                t("route_tool_apply_error", self.current_lang, error=str(error))
+            )
 
     # ---------------- TAB 6: PATHS & BACKUPS (No Scrollbar) ----------------
     def build_backups_tab(self):
@@ -2663,8 +3201,14 @@ class DcsVrUiEditorApp(ctk.CTk):
 
     # ---------------- FOOTER & ACTIONS ----------------
     def create_footer(self):
-        footer_frame = ctk.CTkFrame(self, corner_radius=10, fg_color=THEME["header_bg"])
+        footer_frame = ctk.CTkFrame(
+            self,
+            height=50,
+            corner_radius=10,
+            fg_color=THEME["header_bg"]
+        )
         footer_frame.pack(fill="x", padx=15, pady=(0, 10))
+        footer_frame.pack_propagate(False)
 
         # Status text
         self.status_label = ctk.CTkLabel(
@@ -2786,12 +3330,16 @@ class DcsVrUiEditorApp(ctk.CTk):
         if hasattr(self, "lbl_scene_title"):
             self.lbl_scene_title.configure(text=t("scene_card_title", lang))
             self.lbl_scene_desc.configure(text=t("scene_card_desc", lang))
+            self.lbl_route_tool_title.configure(text=t("route_tool_card_title", lang))
+            self.lbl_route_tool_desc.configure(text=t("route_tool_card_desc", lang))
+            self.switch_route_tool.configure(text=t("route_tool_switch", lang))
             self.rb_scene_sky.configure(text=t("scene_opt_sky", lang))
             self.lbl_scene_sky_sub.configure(text=t("scene_opt_sky_sub", lang))
             self.rb_scene_orig.configure(text=t("scene_opt_original", lang))
             self.lbl_scene_orig_sub.configure(text=t("scene_opt_original_sub", lang))
             self.rb_scene_black.configure(text=t("scene_opt_black", lang))
             self.lbl_scene_black_sub.configure(text=t("scene_opt_black_sub", lang))
+            self.refresh_scene_original_control()
             self.update_scene_vr_badge()
 
             self.lbl_cfg_title.configure(text=t("cfg_card_title", lang))
@@ -2804,6 +3352,7 @@ class DcsVrUiEditorApp(ctk.CTk):
                 ("options.graphics.stereo_mode_use_shared_parser", "cfg_shared_parser_name"),
             ):
                 self.autoexec_widget_rows[key]["name"].configure(text=t(name_key, lang))
+            self.refresh_route_tool_control()
             self.refresh_autoexec_controls()
 
         # Tab 6: Backups
@@ -2932,6 +3481,11 @@ class DcsVrUiEditorApp(ctk.CTk):
                 self.lbl_sg_status.configure(text=t("path_invalid_sg", lang), text_color=THEME["status_red_text"])
 
     def action_refresh_live_state(self):
+        self.route_tool_path = Path(self.dcs_path) / "Scripts" / "UI" / "RouteTool" / "RouteTool.lua"
+        from route_tool_manager import ensure_route_tool_original_backup
+        ensure_route_tool_original_backup(self.route_tool_path)
+        from scene_vr_manager import ensure_scene_vr_backup
+        ensure_scene_vr_backup(self.target_files)
         self.current_live_state = read_current_state(self.target_files)
         self.working_state = self.current_live_state.copy()
         self.sync_ui_from_state(self.working_state)
@@ -2940,15 +3494,35 @@ class DcsVrUiEditorApp(ctk.CTk):
         if hasattr(self, "var_scene_mode"):
             from scene_vr_manager import detect_scene_vr_mode
             self.var_scene_mode.set(detect_scene_vr_mode(self.target_files))
+            self.refresh_scene_original_control()
             self.update_scene_vr_badge()
         if hasattr(self, "autoexec_widget_rows"):
             self.refresh_autoexec_controls()
+        if hasattr(self, "switch_route_tool"):
+            self.refresh_route_tool_control()
 
     def action_one_click_reapply(self):
         """One-click apply after game update: loads the target preset or saved custom profile and writes to DCS."""
         active_preset = self.app_settings.get("active_preset", "custom")
         if active_preset in PRESETS:
             profile = PRESETS[active_preset]["settings"]
+            ready, error = self._preflight_builtin_options()
+            if not ready:
+                self.show_dark_error(
+                    t("dialog_error_title", self.current_lang),
+                    t("builtin_preset_originals_error", self.current_lang, error=error)
+                )
+                return
+            option_files, option_errors = self._restore_builtin_options()
+            if option_errors:
+                if option_files:
+                    self._sync_builtin_option_ui()
+                err_str = "\n".join(f"• {error}" for error in option_errors)
+                self.show_dark_error(
+                    t("dialog_error_title", self.current_lang),
+                    t("dialog_error_apply", self.current_lang, errors=err_str)
+                )
+                return
         else:
             profile = self.app_settings.get("saved_custom_profile")
             if not profile:
@@ -2962,15 +3536,29 @@ class DcsVrUiEditorApp(ctk.CTk):
         self.sync_ui_from_state(self.working_state)
 
         success, updated_files, errors = apply_settings(self.target_files, self.working_state)
+        if active_preset in PRESETS:
+            updated_files.extend(option_files)
+            self._sync_builtin_option_ui()
+        else:
+            option_files, option_errors = self.apply_custom_profile_options(profile)
+            updated_files.extend(option_files)
+            errors.extend(option_errors)
         if success:
             self.current_live_state = read_current_state(self.target_files)
             self.update_presets_tab_display()
-            if updated_files:
+            if errors:
+                err_str = "\n".join(f"• {error}" for error in errors)
+                msg = t("dialog_error_apply", self.current_lang, errors=err_str)
+                self.show_dark_error(t("dialog_error_title", self.current_lang), msg)
+            elif updated_files:
                 files_str = "\n".join(f"• {f}" for f in updated_files)
                 msg = t("dialog_reapply_msg", self.current_lang, count=len(updated_files), files=files_str)
+                self.show_dark_info(t("dialog_success_title", self.current_lang), msg)
             else:
-                msg = t("dialog_reapply_unchanged", self.current_lang)
-            self.show_dark_info(t("dialog_success_title", self.current_lang), msg)
+                self.show_dark_info(
+                    t("dialog_success_title", self.current_lang),
+                    t("dialog_reapply_unchanged", self.current_lang)
+                )
             self.update_status_by_key("status_ready")
         else:
             err_str = "\n".join(f"• {e}" for e in errors)

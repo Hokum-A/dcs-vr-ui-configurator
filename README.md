@@ -12,10 +12,11 @@ A Windows application for customizing selected parts of the DCS World interface,
 - Presets for message and radio menu settings, plus a custom profile.
 - Adjust message width and font size, and radio menu scale and dimensions.
 - Choose the VR background scene: DCS original, procedural sky, or a minimal black scene.
+- Set the first waypoint of a new route to AGL / RADIO, 1 m; only the two corresponding values in `RouteTool.lua` are changed.
 - Manage supported `autoexec.cfg` settings: `DLSS_Preset`, `HUD_MFD_after_DLSS`, `disable_write_track`, `no_device_hotplug`, and `options.graphics.stereo_mode_use_shared_parser`.
 - Automatically detect DCS World and Saved Games paths, with an option to change them in the app.
 
-The custom profile stores settings from the **Messages & Chat** and **Radio Menu** tabs. **Optimization & Tweaks** settings are applied separately and are not part of the profile.
+The custom profile stores settings from **Messages & Chat**, **Radio Menu**, the selected VR scene, and the first-waypoint option. When the custom profile or manual settings are active in DCS, saving the profile also applies these settings to the game files. When a built-in preset is active, the profile is saved in the app without changing DCS files. `autoexec.cfg` settings are not included in the profile and are not changed by saving it. Built-in presets configure messages and the radio menu, and restore the preserved original VR scene and settings for the first waypoint DCS creates in a new route, including its altitude and altitude reference. If the original files are unavailable, the preset is not applied.
 
 ## Screenshot
 
@@ -86,10 +87,11 @@ This project is licensed under the [MIT License](LICENSE).
 - Пресеты для сообщений и радиоменю, а также сохранение пользовательского профиля.
 - Настройка ширины и размера шрифта сообщений, масштаба и размеров радиоменю.
 - Выбор фоновой VR-сцены: оригинальная сцена DCS, процедурное небо или минималистичная чёрная сцена.
+- Переключение высоты и типа первой точки нового маршрута на AGL / RADIO, 1 м; изменяются только два соответствующих значения в `RouteTool.lua`.
 - Управление поддерживаемыми параметрами `autoexec.cfg`: `DLSS_Preset`, `HUD_MFD_after_DLSS`, `disable_write_track`, `no_device_hotplug` и `options.graphics.stereo_mode_use_shared_parser`.
 - Автоматическое определение путей к DCS World и папке Saved Games с возможностью изменить их в программе.
 
-Пользовательский профиль содержит настройки вкладок **«Сообщения и Чат»** и **«Радиоменю»**. Параметры вкладки **«Оптимизация и твики»** применяются отдельно и в профиль не входят.
+Пользовательский профиль сохраняет настройки вкладок **«Сообщения и Чат»**, **«Радиоменю»**, выбранную VR-сцену и параметр первой путевой точки. Если пользовательский профиль или ручные настройки активны в DCS, при сохранении они также применяются к файлам игры. Если активен штатный пресет, профиль сохраняется в программе без изменения файлов DCS. Параметры `autoexec.cfg` в профиль не входят и при сохранении профиля не изменяются. Штатные пресеты настраивают сообщения и радиоменю, а также восстанавливают сохранённые оригинальные настройки VR-сцены и первой точки, которую DCS создаёт при построении нового маршрута, включая её высоту и способ отсчёта. Если оригинальные файлы недоступны, пресет не применяется.
 
 ## Скриншот
 
