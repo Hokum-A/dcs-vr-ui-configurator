@@ -3,15 +3,15 @@ from typing import Dict, Any
 PRESETS: Dict[str, Dict[str, Any]] = {
     "recommended_vr": {
         "title_ru": "Рекомендуемый (Quest 3 / Оптимальный)",
-        "desc_ru": "Сбалансированные размеры для VR. Текст сообщений занимает 1/4 экрана, четкий аккуратный шрифт 13pt (вместо огромного 20pt), радиоменю 1.40x.",
+        "desc_ru": "Сбалансированные размеры для VR. Текст сообщений занимает 1/4 экрана, четкий аккуратный шрифт 13pt (вместо огромного 20pt), радиоменю 1.50x.",
         "title_en": "Recommended (Quest 3 / Optimal)",
-        "desc_en": "Balanced VR dimensions. Messages take 1/4 of screen width, crisp 13pt font (instead of 20pt), compact 1.40x radio menu.",
+        "desc_en": "Balanced VR dimensions. Messages take 1/4 of screen width, crisp 13pt font (instead of 20pt), compact 1.50x radio menu.",
         "settings": {
             "msg_width_mode": "fraction",
             "msg_width_fraction": "1/4",
             "msg_width_fixed": 650,
             "msg_hmd_font_size": 13,
-            "radio_hmd_scale": 1.4,
+            "radio_hmd_scale": 1.5,
             "radio_width": 280,
             "radio_height": 380
         }

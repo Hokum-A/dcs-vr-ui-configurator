@@ -19,7 +19,7 @@ DEFAULT_SETTINGS = {
     "saved_games_path": str(Path.home() / "Saved Games" / "DCS.openbeta"),
     "active_preset": "recommended_vr",
     "saved_custom_profile": {},
-    "window_width": 1380,
+    "window_width": 1280,
     "window_height": 766,
     "language": "ru"
 }

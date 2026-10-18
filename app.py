@@ -1144,7 +1144,7 @@ class DcsVrUiEditorApp(ctk.CTk):
         self.saved_games_path = self.app_settings.get("saved_games_path", str(Path.home() / "Saved Games" / "DCS.openbeta"))
 
         # Keep enough room for the optimization controls and footer without excess space below.
-        init_w = max(1300, int(self.app_settings.get("window_width", 1320)))
+        init_w = max(1200, min(1280, int(self.app_settings.get("window_width", 1280))))
         saved_h = int(self.app_settings.get("window_height", 780))
         init_h = 780 if saved_h == 820 else max(780, saved_h)
         self.update_idletasks()
@@ -1153,7 +1153,7 @@ class DcsVrUiEditorApp(ctk.CTk):
         available_h = max(600, screen_h - 80)
         min_h = min(780, available_h)
         init_h = min(init_h, available_h)
-        self.minsize(1320, min_h)
+        self.minsize(1200, min_h)
 
         # Center on screen
         pos_x = max(0, (screen_w - init_w) // 2)
@@ -3573,13 +3573,29 @@ class DcsVrUiEditorApp(ctk.CTk):
             return
 
         success, restored = restore_clean_original(self.target_files)
-        if success:
-            self.action_refresh_live_state()
-            self.show_dark_info(t("dialog_success_title", self.current_lang), t("dialog_restore_success", self.current_lang, count=len(restored)))
-            self.update_status_by_key("status_ready")
+        errors = []
+        if not success:
+            errors.append(t("dialog_restore_standard_error", self.current_lang))
+
+        from route_tool_manager import RouteToolError, restore_route_tool_original
+        try:
+            if restore_route_tool_original(self.route_tool_path):
+                restored.append("RouteTool.lua")
+        except (OSError, RouteToolError) as error:
+            errors.append(t("dialog_restore_route_error", self.current_lang, error=str(error)))
+
+        self.action_refresh_live_state()
+        if errors:
+            self.show_dark_error(
+                t("dialog_error_title", self.current_lang),
+                t("dialog_restore_error", self.current_lang, errors="\n".join(f"• {error}" for error in errors))
+            )
         else:
-            err_msg = "Не удалось восстановить оригинальные файлы." if self.current_lang == "ru" else "Failed to restore original files."
-            self.show_dark_error(t("dialog_error_title", self.current_lang), err_msg)
+            self.show_dark_info(
+                t("dialog_success_title", self.current_lang),
+                t("dialog_restore_success", self.current_lang, count=len(restored))
+            )
+            self.update_status_by_key("status_ready")
 
     def on_close(self):
         try:
